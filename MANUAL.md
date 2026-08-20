@@ -23,7 +23,7 @@ channel. While building this, three hard facts shaped every decision:
    // ignore_for_file: implementation_imports
    ```
 2. **On macOS you cannot create a borderless window through Flutter.**
-   `RegularWindowController(decorated: false)` throws
+   `WindowController(decorated: false)` throws
    `UnimplementedError('Undecorated windows are not yet implemented on macOS.')`
    (`flutter/lib/src/widgets/_window_macos.dart`). So "no title bar" must be done
    natively in AppKit _after_ Flutter creates the (decorated) window.
@@ -39,8 +39,8 @@ chrome + frame tracking.
 
 ## 1. Prerequisites
 
-- **fvm** with a `master`‑channel Flutter pinned locally. This repo used
-  `master 3.45.0‑1.0.pre` (Dart 3.13). Verify:
+- **fvm** with a `master`‑channel Flutter pinned locally. Last verified against
+  `master 3.48.0‑1.0.pre‑320` (Dart 3.14). Verify:
   ```bash
   fvm flutter --version      # channel should be master/main
   ```
@@ -97,23 +97,26 @@ instantiated. The xib no longer references it.)
 ## 4. How multiple windows render (the composition model)
 
 - `main()` calls **`runWidget(...)`** (not `runApp`).
-- The root is the **main window**:
+- The root is a **`WindowManager`**, and the main window is just its first entry:
   ```dart
-  PanelScope(                       // shared PanelManager, ABOVE MaterialApp (see §5)
+  PanelScope(                       // shared PanelManager, ABOVE WindowManager (see §5)
     manager: manager,
-    child: RegularWindow(
-      controller: mainController,    // RegularWindowController(...)
-      child: MaterialApp(home: Workspace()),
+    child: WindowManager(
+      initialWindows: <WindowEntry>[
+        WindowEntry(
+          controller: mainController, // WindowController(...)
+          builder: (ctx) => MaterialApp(home: Workspace()),
+        ),
+      ],
     ),
   )
   ```
-- `MaterialApp`/`WidgetsApp` **auto‑inserts a `WindowManager`** when windowing is
-  enabled (`flutter/lib/src/widgets/app.dart`). `WindowManager` provides a
-  `WindowRegistry` and renders every registered window as a **sibling view** via
-  `ViewAnchor`/`ViewCollection`.
+- `WindowManager` owns the `WindowRegistry` and renders **every** registered
+  window — the main one included — as a sibling view via `ViewCollection`. Each
+  entry's `builder` supplies that window's own `MaterialApp`.
 - To open a new window you build a controller + a `WindowEntry` and register it:
   ```dart
-  final controller = RegularWindowController(title: ..., preferredSize: ...);
+  final controller = WindowController(title: ..., size: ...);
   final entry = WindowEntry(controller: controller, builder: (ctx) => MyContent());
   WindowRegistry.of(context).register(entry);   // appears as its own OS window
   // ...controller.destroy() + registry.unregister(entry) to close it.
@@ -123,9 +126,9 @@ instantiated. The xib no longer references it.)
 
 ## 5. Two non‑obvious gotchas inside Flutter
 
-1. **`PanelScope` must sit ABOVE `MaterialApp`.** Detached windows render as
-   _sibling_ views of the main content (under `WindowManager`, which `MaterialApp`
-   inserts). They inherit ancestors of `MaterialApp`, so the shared `PanelManager`
+1. **`PanelScope` must sit ABOVE `WindowManager`.** Detached windows render as
+   _sibling_ views under `WindowManager`, not as descendants of the main window.
+   They only inherit ancestors of `WindowManager`, so the shared `PanelManager`
    has to be provided above it or the floating windows can't see it.
 
 2. **Each detached window needs its OWN `MaterialApp` + a `Material` ancestor.** A
@@ -242,9 +245,13 @@ final manager = PanelManager()
 
 runWidget(PanelScope(
   manager: manager,
-  child: RegularWindow(
-    controller: RegularWindowController(preferredSize: const Size(1180, 760)),
-    child: MaterialApp(home: Scaffold(body: PanelDock())),
+  child: WindowManager(
+    initialWindows: <WindowEntry>[
+      WindowEntry(
+        controller: WindowController(size: const Size(1180, 760)),
+        builder: (_) => MaterialApp(home: Scaffold(body: PanelDock())),
+      ),
+    ],
   ),
 ));
 ```
