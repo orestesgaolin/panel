@@ -152,17 +152,19 @@ fvm flutter run -d macos</pre>
   <section data-title="Composition">
     <div class="kicker">Step 4 · How windows compose</div>
     <h2>One tree, many views</h2>
-    <p><code>runWidget</code> renders the main window; the surrounding app widget auto‑inserts a <code>WindowManager</code> that renders every registered window as a <strong>sibling view</strong> via <code>ViewAnchor</code> — all in one isolate, so every window shares one <code>PanelManager</code>.</p>
-    <pre><span class="k">runWidget</span>(<span class="t">PanelScope</span>(            <span class="c">// shared state, above your app widget</span>
+    <p><code>runWidget</code> renders a <code>WindowManager</code>, which renders every registered window — the main one included — as a <strong>sibling view</strong> via <code>ViewCollection</code>. All in one isolate, so every window shares one <code>PanelManager</code>.</p>
+    <pre><span class="k">runWidget</span>(<span class="t">PanelScope</span>(            <span class="c">// shared state, above WindowManager</span>
   manager: manager,
-  child: <span class="t">RegularWindow</span>(            <span class="c">// the main OS window</span>
-    controller: <span class="t">RegularWindowController</span>(preferredSize: <span class="t">Size</span>(1180, 760)),
-    child: <span class="t">AppShell</span>(home: <span class="t">PanelDock</span>()),  <span class="c">// any WidgetsApp</span>
+  child: <span class="t">WindowManager</span>(            <span class="c">// hosts every OS window</span>
+    initialWindows: [<span class="t">WindowEntry</span>(
+      controller: <span class="t">WindowController</span>(size: <span class="t">Size</span>(1180, 760)),
+      builder: (_) =&gt; <span class="t">AppShell</span>(home: <span class="t">PanelDock</span>()),  <span class="c">// any WidgetsApp</span>
+    )],
   ),
 ));</pre>
     <ul>
       <li><strong>Not dependent on Material</strong> — drop <code>PanelDock</code> into any app shell; its look comes from <code>PanelTheme</code>, not Material.</li>
-      <li><strong>PanelScope</strong> sits above your app widget so detached sibling‑view windows can still read the shared manager.</li>
+      <li><strong>PanelScope</strong> sits above <code>WindowManager</code> so detached sibling‑view windows can still read the shared manager.</li>
     </ul>
   </section>
 
