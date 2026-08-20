@@ -1,9 +1,13 @@
 // Demo app for the dockable panels framework (lib/panels/).
 //
-// Run on macOS with the experimental windowing feature flag:
+// Enable the experimental windowing feature flag once, then run on macOS:
 //
-//   fvm flutter run -d macos \
-//     --dart-define=FLUTTER_ENABLED_FEATURE_FLAGS=windowing
+//   fvm flutter config --enable-macos-desktop --enable-windowing
+//   fvm flutter run -d macos
+//
+// (The flag used to be settable per-run via
+// --dart-define=FLUTTER_ENABLED_FEATURE_FLAGS=windowing; flutter_tools now
+// rejects that and reads feature flags from `flutter config` only.)
 //
 // The windowing APIs are `@internal` and only exist on the main/master
 // channel, hence the two analyzer ignores below (same as the official
@@ -45,7 +49,7 @@ ThemeData _buildTheme(Brightness brightness) {
 }
 
 /// Closes the whole app when the main window is destroyed.
-class _MainWindowDelegate with RegularWindowControllerDelegate {
+class _MainWindowDelegate with WindowControllerDelegate {
   @override
   void onWindowDestroyed() {
     super.onWindowDestroyed();
@@ -111,9 +115,9 @@ class PanelExampleApp extends StatefulWidget {
 }
 
 class _PanelExampleAppState extends State<PanelExampleApp> {
-  final RegularWindowController _controller = RegularWindowController(
-    preferredSize: const Size(1180, 760),
-    preferredConstraints: const BoxConstraints(minWidth: 720, minHeight: 480),
+  final WindowController _controller = WindowController(
+    size: const Size(1180, 760),
+    constraints: const BoxConstraints(minWidth: 720, minHeight: 480),
     title: 'Panel — Dockable Panels',
     delegate: _MainWindowDelegate(),
   );
@@ -126,23 +130,27 @@ class _PanelExampleAppState extends State<PanelExampleApp> {
 
   @override
   Widget build(BuildContext context) {
-    // PanelScope sits ABOVE MaterialApp so the detached window subtrees (which
-    // the framework renders as sibling views inside MaterialApp's WindowManager)
-    // can still read the shared PanelManager.
+    // PanelScope sits ABOVE WindowManager so the detached window subtrees (which
+    // WindowManager renders as sibling views, each with its own MaterialApp) can
+    // still read the shared PanelManager.
     return PanelScope(
       manager: widget.manager,
-      child: RegularWindow(
-        controller: _controller,
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Panel',
-          theme: _buildTheme(Brightness.light),
-          darkTheme: _buildTheme(Brightness.dark),
-          themeMode: ThemeMode.system,
-          // MacosPanelHost (under MaterialApp) hands the WindowRegistry to the
-          // backend and makes the main window's title bar transparent.
-          home: MacosPanelHost(backend: widget.backend, child: const _Workspace()),
-        ),
+      child: WindowManager(
+        initialWindows: <WindowEntry>[
+          WindowEntry(
+            controller: _controller,
+            builder: (BuildContext context) => MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Panel',
+              theme: _buildTheme(Brightness.light),
+              darkTheme: _buildTheme(Brightness.dark),
+              themeMode: ThemeMode.system,
+              // MacosPanelHost (under MaterialApp) hands the WindowRegistry to
+              // the backend and makes the main window's title bar transparent.
+              home: MacosPanelHost(backend: widget.backend, child: const _Workspace()),
+            ),
+          ),
+        ],
       ),
     );
   }
