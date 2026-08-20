@@ -21,19 +21,19 @@ import 'native_dock.dart';
 /// One detached panel window.
 class _FloatingWindow {
   _FloatingWindow(this.controller, this.entry);
-  final RegularWindowController controller;
+  final WindowController controller;
   final WindowEntry entry;
 }
 
 /// Forwards window lifecycle events to closures (intercepts native close so it
 /// re-docks instead of destroying, and cleans up on destroy).
-class _PanelWindowDelegate with RegularWindowControllerDelegate {
+class _PanelWindowDelegate with WindowControllerDelegate {
   _PanelWindowDelegate({required this.onCloseRequested, required this.onDestroyed});
   final VoidCallback onCloseRequested;
   final VoidCallback onDestroyed;
 
   @override
-  void onWindowCloseRequested(RegularWindowController controller) => onCloseRequested();
+  void onWindowCloseRequested(WindowController controller) => onCloseRequested();
 
   @override
   void onWindowDestroyed() {
@@ -81,10 +81,10 @@ class MacosWindowingBackend extends PanelWindowingBackend {
     final String id = descriptor.id;
     final String token = panelWindowToken(id);
     late final WindowEntry entry;
-    final RegularWindowController controller = RegularWindowController(
+    final WindowController controller = WindowController(
       title: token,
-      preferredSize: descriptor.detachedSize ?? manager.config.defaultDetachedSize,
-      preferredConstraints: manager.config.detachedConstraints,
+      size: descriptor.detachedSize ?? manager.config.defaultDetachedSize,
+      constraints: manager.config.detachedConstraints,
       delegate: _PanelWindowDelegate(
         onCloseRequested: () => manager.redock(id),
         onDestroyed: () => _windows.remove(id),
