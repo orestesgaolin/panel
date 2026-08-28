@@ -46,8 +46,8 @@ jobs:
           key: pub-${{ runner.os }}-${{ hashFiles('docs/docs/pubspec.lock', 'packages/panel/pubspec.lock') }}
           restore-keys: pub-${{ runner.os }}-
 
-      # jaspr CLI, pinned to match the project's jaspr ^0.23.x.
-      - run: dart pub global activate jaspr_cli 0.23.1
+      # Jaspr CLI, pinned to match the project and its build daemon.
+      - run: dart pub global activate jaspr_cli 0.23.4
 
       - name: Resolve dependencies
         working-directory: docs/docs

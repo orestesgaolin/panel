@@ -4,9 +4,9 @@
 
 const String heroHtml = r'''
 <section data-title="Panel">
-  <div class="kicker">A Flutter desktop micro-framework</div>
+  <div class="kicker">Dockable panels for Flutter desktop</div>
   <h1>Panel</h1>
-  <p class="lede">Dockable, splittable, detachable panels, like an IDE, built on Flutter's experimental multi-window APIs plus a thin native AppKit layer on macOS.</p>
+  <p class="lede">Build an IDE-style workspace in Flutter. Dock tabs, split the layout, or pull a panel into its own macOS window.</p>
   <div>
     <span class="tag">drag tabs to dock &amp; split</span>
     <span class="tag">tear off into real OS windows</span>
@@ -23,18 +23,18 @@ const String heroHtml = r'''
 // After the intro demo: how multi-window works, popping out, and distribution.
 const String blockA = r'''
 <section data-title="Multi-window">
-  <div class="kicker">How it works · Multi-window</div>
-  <h2>Real OS windows, one engine</h2>
-  <p>Flutter desktop is gaining true multi-window support (led by Canonical). One engine and one isolate drive many native windows: each window is a Flutter <strong>view</strong> rendered from the same widget tree, all sharing the same state. No second isolate, no IPC.</p>
-  <p>It's experimental, on the <strong>main/master</strong> channel behind a flag. Enable it once:</p>
+  <div class="kicker">How it works · Flutter windowing</div>
+  <h2>A panel can become a real window</h2>
+  <p>Flutter's new desktop windowing API lets one app draw into several native windows. They remain part of the same widget tree, so a detached panel keeps the same state as the dock it came from.</p>
+  <p>The API is still experimental and available on Flutter's <strong>main/master</strong> channel behind a flag. Enable it once:</p>
   <pre>fvm flutter config --enable-windowing</pre>
-  <p class="muted">Background: <a href="https://ubuntu.com/blog/multiple-window-flutter-desktop" target="_blank" rel="noopener">Canonical's write-up</a> · <a href="https://github.com/flutter/flutter/issues/142845" target="_blank" rel="noopener">Flutter tracking issue #142845</a>.</p>
+  <p class="muted">Start with Flutter's official article: <a href="https://flutter.dev/blog/desktop-windowing-apis" target="_blank" rel="noopener">Introducing the Desktop Windowing API</a>. For more detail, see <a href="https://ubuntu.com/blog/multiple-window-flutter-desktop" target="_blank" rel="noopener">Canonical's write-up</a> or <a href="https://github.com/flutter/flutter/issues/142845" target="_blank" rel="noopener">the tracking issue</a>.</p>
 </section>
 
 <section data-title="Pop out">
   <div class="kicker">How it works · Pop-out</div>
   <h2>Pop a panel into its own window</h2>
-  <p>Detaching a panel creates a new top-level window from Dart, and the windowing layer renders it as another sibling view of the same tree. Because every window shares one <code>PanelManager</code>, the torn-off panel keeps working and can be dragged back to snap into the dock.</p>
+  <p>Pull a tab away and Panel opens it in a new macOS window. It keeps working with the same app state, and you can drag it back over the main window to dock it again.</p>
   <svg class="popsvg" viewBox="0 0 480 250" role="img" aria-label="A panel popping out into its own window and snapping back into the dock">
     <!-- dock target shown while the panel is popped out -->
     <rect class="ps-slot" x="146" y="78" width="112" height="128" rx="6"/>
@@ -76,13 +76,13 @@ const String blockA = r'''
 </section>
 
 <section data-title="Packages">
-  <div class="kicker">Distribution</div>
-  <h2>Pure Flutter + a macOS native part</h2>
-  <p>The docking core is plain Flutter and runs anywhere, including this web page. The native window integration lives in a separate macOS piece; detaching is delegated to a backend, so the core carries no windowing or FFI.</p>
+  <div class="kicker">Use only what you need</div>
+  <h2>Flutter for the dock, macOS for the windows</h2>
+  <p>The dock itself is regular Flutter and even runs in this web page. The optional macOS package adds detachable windows without tying the core package to one platform.</p>
   <div class="grid">
-    <div class="card"><h3>package:panel</h3><p>Pure Flutter core: docking, tabs, splits, persistence, shortcuts. No windowing or FFI.</p></div>
-    <div class="card"><h3>package:panel_macos</h3><p>The macOS native integration: real detachable windows via Flutter windowing + an FFI bridge to AppKit.</p></div>
-    <div class="card"><h3>example/</h3><p>A demo app wiring both together on macOS.</p></div>
+    <div class="card"><h3>package:panel</h3><p>Tabs, docking, splits, saved layouts, themes, and keyboard shortcuts.</p></div>
+    <div class="card"><h3>package:panel_macos</h3><p>Turns detached panels into native macOS windows and lets them snap back.</p></div>
+    <div class="card"><h3>example/</h3><p>A complete macOS app showing the two packages together.</p></div>
   </div>
 </section>
 ''';
@@ -90,15 +90,15 @@ const String blockA = r'''
 // After the regions + drag demos: the native layer.
 const String blockB = r'''
 <section data-title="Native dock">
-  <div class="kicker">The native layer</div>
-  <h2>AppKit does what Flutter can't</h2>
-  <p>On macOS a <code>dart:ffi</code> bridge connects Dart and Swift (forward calls via <strong>ffigen</strong> into Swift <code>@_cdecl</code> functions, reverse drag/drop events via <code>NativeCallable</code> pointers) for things Flutter can't do itself:</p>
+  <div class="kicker">A small macOS helper</div>
+  <h2>Flutter creates the window; AppKit finishes it</h2>
+  <p>Flutter now handles the windows themselves. A small Swift helper fills the few gaps needed for an IDE-style detachable panel:</p>
   <ul>
-    <li><strong>Hide the title bar:</strong> the detached window is styled <code>fullSizeContentView</code> with a transparent titlebar, hidden traffic lights and <code>isMovableByWindowBackground</code>.</li>
-    <li><strong>Open where you are:</strong> it's positioned at the mouse and moved to the active Space.</li>
-    <li><strong>Drag-back snapping:</strong> a 60 fps timer streams the live pointer + window frames and detects release via <code>NSEvent.pressedMouseButtons</code>.</li>
+    <li><strong>Custom appearance:</strong> remove the title bar and window buttons.</li>
+    <li><strong>Sensible placement:</strong> open near the pointer on the active desktop.</li>
+    <li><strong>Docking:</strong> follow the window while it is dragged and snap it back on release.</li>
   </ul>
-  <p>Symbols ship in the plugin framework and resolve from Dart via <code>DynamicLibrary.process()</code>, so the example needs no Swift in its runner.</p>
+  <p>The helper ships inside <code>package:panel_macos</code>, so apps using Panel do not need to copy its Swift code.</p>
 </section>
 ''';
 
@@ -134,16 +134,16 @@ const String blockC = r'''
 
 <section data-title="Recap">
   <div class="kicker">That's the whole thing</div>
-  <h2>Flutter windows + a little Swift</h2>
-  <p class="lede">Experimental multi-window Flutter gives real OS windows in one shared isolate; a thin AppKit layer supplies the borderless chrome and pointer-tracked docking.</p>
-  <p>Everything else, splits, theming, persistence and shortcuts, is plain Dart, so the core compiles to web too. The live docks on this page are <code>package:panel</code> running in your browser, embedded with <code>jaspr_flutter_embed</code>.</p>
+  <h2>A Flutter dock that feels at home on desktop</h2>
+  <p class="lede">Use Flutter's windowing API for real windows and a small macOS helper for the final desktop details.</p>
+  <p>Splits, themes, saved layouts, and shortcuts stay in Dart. The live examples on this page are the same <code>package:panel</code> widgets running in your browser.</p>
   <p class="muted">See <code>MANUAL.md</code> for the full build guide and the package READMEs for the API.</p>
 </section>
 
 <section data-title="Subscribe">
   <div class="kicker">Stay in the loop</div>
   <h2>Occasional Flutter</h2>
-  <p>Notes on Flutter, native-interop, multi-window, and building things like this.</p>
+  <p>Practical notes on Flutter desktop, native platform work, and projects like this one.</p>
   <iframe src="https://occasionalflutter.substack.com/embed?transparent=1&light=1" width="480" height="150" style="border: 1px solid #EEE;" frameborder="0" scrolling="no"></iframe>
 </section>
 ''';

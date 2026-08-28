@@ -110,6 +110,7 @@
     <div class="kicker">Step 1 · The constraint</div>
     <h2>Multi‑window is experimental</h2>
     <p>Everything hangs off Flutter's windowing APIs, which only exist on the <strong>main/master</strong> channel and are <code>@internal</code>. Three hard facts shaped every decision:</p>
+    <p class="muted">For the current API and a minimal example, read Flutter's official <a href="https://flutter.dev/blog/desktop-windowing-apis">Desktop Windowing API introduction</a>.</p>
     <ul>
       <li>The APIs live in a private file — you import it and silence two analyzer rules.</li>
       <li>On macOS you <strong>cannot</strong> create a borderless window through Flutter (<code>decorated:false</code> throws) — so "no title bar" is done natively.</li>

@@ -2,10 +2,9 @@
 // borderless top-level windows via Flutter's experimental windowing APIs, with
 // native chrome + drag-back snapping over FFI.
 //
-// This is the ONLY place in the framework that touches the experimental
-// windowing APIs and the native bridge, so it carries the two analyzer ignores
-// the official `examples/multiple_windows` sample uses. (In the package split
-// this whole file moves to `panel_macos`.)
+// This is the only package file that touches Flutter's experimental windowing
+// API. WindowManager/WindowRegistry are intentional: Flutter's current
+// `examples/multiple_windows` app uses them to add windows dynamically.
 
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
@@ -28,12 +27,16 @@ class _FloatingWindow {
 /// Forwards window lifecycle events to closures (intercepts native close so it
 /// re-docks instead of destroying, and cleans up on destroy).
 class _PanelWindowDelegate with WindowControllerDelegate {
-  _PanelWindowDelegate({required this.onCloseRequested, required this.onDestroyed});
+  _PanelWindowDelegate({
+    required this.onCloseRequested,
+    required this.onDestroyed,
+  });
   final VoidCallback onCloseRequested;
   final VoidCallback onDestroyed;
 
   @override
-  void onWindowCloseRequested(WindowController controller) => onCloseRequested();
+  void onWindowCloseRequested(WindowController controller) =>
+      onCloseRequested();
 
   @override
   void onWindowDestroyed() {
@@ -66,8 +69,8 @@ class MacosWindowingBackend extends PanelWindowingBackend {
       ..onPanelDrop = _onPanelDrop;
   }
 
-  /// Wires the windowing `WindowRegistry` (from a [MacosPanelHost] context).
-  /// Detached windows are rendered as sibling views by that registry.
+  /// Wires Flutter's window registry from a [MacosPanelHost] context.
+  /// Detached windows are rendered alongside the main window by this registry.
   void bindRegistry(WindowRegistry registry) => _registry = registry;
 
   /// Makes the main window's title bar transparent/full-size.
@@ -80,7 +83,6 @@ class MacosWindowingBackend extends PanelWindowingBackend {
     if (registry == null) return; // host not mounted yet
     final String id = descriptor.id;
     final String token = panelWindowToken(id);
-    late final WindowEntry entry;
     final WindowController controller = WindowController(
       title: token,
       size: descriptor.detachedSize ?? manager.config.defaultDetachedSize,
@@ -90,7 +92,10 @@ class MacosWindowingBackend extends PanelWindowingBackend {
         onDestroyed: () => _windows.remove(id),
       ),
     );
-    entry = WindowEntry(controller: controller, builder: (BuildContext context) => FloatingPanelContent(panelId: id));
+    final WindowEntry entry = WindowEntry(
+      controller: controller,
+      builder: (BuildContext context) => FloatingPanelContent(panelId: id),
+    );
     _windows[id] = _FloatingWindow(controller, entry);
     registry.register(entry);
     if (manager.config.enableNativeChrome) NativeDock.instance.decorate(token);
@@ -112,7 +117,9 @@ class MacosWindowingBackend extends PanelWindowingBackend {
 
   @override
   void beginWindowDrag(String id) {
-    if (_windows.containsKey(id)) NativeDock.instance.startWindowDrag(panelWindowToken(id));
+    if (_windows.containsKey(id)) {
+      NativeDock.instance.startWindowDrag(panelWindowToken(id));
+    }
   }
 
   // Native drag-back reporting -> generic manager hooks.
@@ -140,7 +147,9 @@ class _MacosPanelHostState extends State<MacosPanelHost> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => widget.backend.decorateMainWindow());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => widget.backend.decorateMainWindow(),
+    );
   }
 
   @override

@@ -2,6 +2,9 @@
 
 See demo at https://roszkowski.dev/panel
 
+Flutter's official introduction to the windowing API:
+https://flutter.dev/blog/desktop-windowing-apis
+
 IDE-style dockable / tabbed / splittable / detachable panels for Flutter, split
 into a platform-generic core and a macOS backend (Melos workspace).
 

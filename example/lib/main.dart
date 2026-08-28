@@ -10,8 +10,8 @@
 // rejects that and reads feature flags from `flutter config` only.)
 //
 // The windowing APIs are `@internal` and only exist on the main/master
-// channel, hence the two analyzer ignores below (same as the official
-// examples/multiple_windows sample).
+// channel. WindowManager/WindowEntry match Flutter's current
+// examples/multiple_windows app; the two analyzer ignores are still required.
 
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
@@ -34,13 +34,19 @@ const List<String> kMonoFonts = <String>['Menlo', 'SF Mono', 'monospace'];
 /// A neutral, untinted Material theme for the main window chrome, derived from
 /// the framework's [PanelTheme] so there's no Material surface tint anywhere.
 ThemeData _buildTheme(Brightness brightness) {
-  final PanelTheme panel = brightness == Brightness.dark ? PanelTheme.dark() : PanelTheme.light();
-  final ColorScheme scheme = ColorScheme.fromSeed(seedColor: panel.accent, brightness: brightness).copyWith(
-    surface: panel.surface,
-    onSurface: panel.text,
-    primary: panel.accent,
-    surfaceTint: Colors.transparent,
-  );
+  final PanelTheme panel = brightness == Brightness.dark
+      ? PanelTheme.dark()
+      : PanelTheme.light();
+  final ColorScheme scheme =
+      ColorScheme.fromSeed(
+        seedColor: panel.accent,
+        brightness: brightness,
+      ).copyWith(
+        surface: panel.surface,
+        onSurface: panel.text,
+        primary: panel.accent,
+        surfaceTint: Colors.transparent,
+      );
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
@@ -61,19 +67,20 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final MacosWindowingBackend backend = MacosWindowingBackend();
-  final PanelManager manager = PanelManager(
-    config: PanelDockConfig(storage: JsonFileStorage()),
-    windowing: backend,
-  )
-    ..registerPanel(_explorerPanel, side: DockSide.left)
-    ..registerPanel(_outlinePanel, side: DockSide.left, activate: false)
-    ..registerPanel(_editorPanel, side: DockSide.center)
-    ..registerPanel(_pdfPanel, side: DockSide.center, activate: false)
-    ..registerPanel(_stylesPanel, side: DockSide.center, activate: false)
-    ..registerPanel(_readmePanel, side: DockSide.center, activate: false)
-    ..registerPanel(_inspectorPanel, side: DockSide.right)
-    ..registerPanel(_terminalPanel, side: DockSide.bottom)
-    ..registerPanel(_problemsPanel, side: DockSide.bottom, activate: false);
+  final PanelManager manager =
+      PanelManager(
+          config: PanelDockConfig(storage: JsonFileStorage()),
+          windowing: backend,
+        )
+        ..registerPanel(_explorerPanel, side: DockSide.left)
+        ..registerPanel(_outlinePanel, side: DockSide.left, activate: false)
+        ..registerPanel(_editorPanel, side: DockSide.center)
+        ..registerPanel(_pdfPanel, side: DockSide.center, activate: false)
+        ..registerPanel(_stylesPanel, side: DockSide.center, activate: false)
+        ..registerPanel(_readmePanel, side: DockSide.center, activate: false)
+        ..registerPanel(_inspectorPanel, side: DockSide.right)
+        ..registerPanel(_terminalPanel, side: DockSide.bottom)
+        ..registerPanel(_problemsPanel, side: DockSide.bottom, activate: false);
 
   // Reload the last layout (if any) before showing the window.
   await manager.restore();
@@ -100,12 +107,18 @@ class JsonFileStorage implements PanelStorage {
   Future<void> write(Map<String, Object?> layout) async {
     try {
       await _file.writeAsString(jsonEncode(layout));
-    } catch (_) {/* best-effort */}
+    } catch (_) {
+      /* best-effort */
+    }
   }
 }
 
 class PanelExampleApp extends StatefulWidget {
-  const PanelExampleApp({super.key, required this.manager, required this.backend});
+  const PanelExampleApp({
+    super.key,
+    required this.manager,
+    required this.backend,
+  });
 
   final PanelManager manager;
   final MacosWindowingBackend backend;
@@ -147,7 +160,10 @@ class _PanelExampleAppState extends State<PanelExampleApp> {
               themeMode: ThemeMode.system,
               // MacosPanelHost (under MaterialApp) hands the WindowRegistry to
               // the backend and makes the main window's title bar transparent.
-              home: MacosPanelHost(backend: widget.backend, child: const _Workspace()),
+              home: MacosPanelHost(
+                backend: widget.backend,
+                child: const _Workspace(),
+              ),
             ),
           ),
         ],
@@ -221,38 +237,41 @@ class _WorkspaceState extends State<_Workspace> {
 // ---------------------------------------------------------------------------
 
 PanelDescriptor get _explorerPanel => PanelDescriptor(
-      id: 'explorer',
-      title: 'Explorer',
-      icon: Icons.folder_outlined,
-      builder: (_) => const _FileTree(),
-    );
+  id: 'explorer',
+  title: 'Explorer',
+  icon: Icons.folder_outlined,
+  builder: (_) => const _FileTree(),
+);
 
 PanelDescriptor get _outlinePanel => PanelDescriptor(
-      id: 'outline',
-      title: 'Outline',
-      icon: Icons.account_tree_outlined,
-      builder: (_) => const _ListPanel(items: <String>[
-        'class PanelManager',
-        '  registerPanel()',
-        '  detach()',
-        '  redock()',
-        'class PanelDock',
-        'class FloatingPanelContent',
-      ]),
-    );
+  id: 'outline',
+  title: 'Outline',
+  icon: Icons.account_tree_outlined,
+  builder: (_) => const _ListPanel(
+    items: <String>[
+      'class PanelManager',
+      '  registerPanel()',
+      '  detach()',
+      '  redock()',
+      'class PanelDock',
+      'class FloatingPanelContent',
+    ],
+  ),
+);
 
 PanelDescriptor get _editorPanel => PanelDescriptor(
-      id: 'editor',
-      title: 'main.dart',
-      icon: Icons.description_outlined,
-      builder: (_) => const _EditorMock(),
-    );
+  id: 'editor',
+  title: 'main.dart',
+  icon: Icons.description_outlined,
+  builder: (_) => const _EditorMock(),
+);
 
 PanelDescriptor get _stylesPanel => PanelDescriptor(
-      id: 'styles',
-      title: 'styles.css',
-      icon: Icons.css,
-      builder: (_) => const _CodeView(code: '''
+  id: 'styles',
+  title: 'styles.css',
+  icon: Icons.css,
+  builder: (_) => const _CodeView(
+    code: '''
 .workspace {
   display: grid;
   grid-template-columns: 240px 1fr 300px;
@@ -261,14 +280,16 @@ PanelDescriptor get _stylesPanel => PanelDescriptor(
 }
 
 .tab.active { border-bottom: 2px solid var(--accent); }
-'''),
-    );
+''',
+  ),
+);
 
 PanelDescriptor get _readmePanel => PanelDescriptor(
-      id: 'readme',
-      title: 'README.md',
-      icon: Icons.article_outlined,
-      builder: (_) => const _CodeView(code: '''
+  id: 'readme',
+  title: 'README.md',
+  icon: Icons.article_outlined,
+  builder: (_) => const _CodeView(
+    code: '''
 # Panes
 
 A dockable / detachable panel framework.
@@ -276,38 +297,37 @@ A dockable / detachable panel framework.
 - Drag a tab to an edge to split a region.
 - ⌘\\ splits the focused panel, ⌘⇧\\ merges it.
 - Detach by dragging a tab out of the window.
-'''),
-    );
+''',
+  ),
+);
 
 PanelDescriptor get _pdfPanel => PanelDescriptor(
-      id: 'pdf',
-      title: 'sample.pdf',
-      icon: Icons.picture_as_pdf_outlined,
-      builder: (_) => const _PdfPreview(),
-    );
+  id: 'pdf',
+  title: 'sample.pdf',
+  icon: Icons.picture_as_pdf_outlined,
+  builder: (_) => const _PdfPreview(),
+);
 
 PanelDescriptor get _inspectorPanel => PanelDescriptor(
-      id: 'inspector',
-      title: 'Inspector',
-      icon: Icons.tune,
-      builder: (_) => const _InspectorMock(),
-    );
+  id: 'inspector',
+  title: 'Inspector',
+  icon: Icons.tune,
+  builder: (_) => const _InspectorMock(),
+);
 
 PanelDescriptor get _terminalPanel => PanelDescriptor(
-      id: 'terminal',
-      title: 'Terminal',
-      icon: Icons.terminal,
-      builder: (_) => const _TerminalMock(),
-    );
+  id: 'terminal',
+  title: 'Terminal',
+  icon: Icons.terminal,
+  builder: (_) => const _TerminalMock(),
+);
 
 PanelDescriptor get _problemsPanel => PanelDescriptor(
-      id: 'problems',
-      title: 'Problems',
-      icon: Icons.error_outline,
-      builder: (_) => const _ListPanel(items: <String>[
-        'No problems detected 🎉',
-      ]),
-    );
+  id: 'problems',
+  title: 'Problems',
+  icon: Icons.error_outline,
+  builder: (_) => const _ListPanel(items: <String>['No problems detected 🎉']),
+);
 
 class _FileTree extends StatelessWidget {
   const _FileTree();
@@ -333,7 +353,11 @@ class _FileTree extends StatelessWidget {
             padding: EdgeInsets.only(left: 8.0 + depth * 16, top: 2, bottom: 2),
             child: Row(
               children: <Widget>[
-                Icon(icon, size: 15, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                Icon(
+                  icon,
+                  size: 15,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 const SizedBox(width: 6),
                 Text(name, style: const TextStyle(fontSize: 13)),
               ],
@@ -359,7 +383,11 @@ class _ListPanel extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 3),
             child: Text(
               item,
-              style: const TextStyle(fontFamily: 'Menlo', fontFamilyFallback: kMonoFonts, fontSize: 12.5),
+              style: const TextStyle(
+                fontFamily: 'Menlo',
+                fontFamilyFallback: kMonoFonts,
+                fontSize: 12.5,
+              ),
             ),
           ),
       ],
@@ -509,7 +537,10 @@ class _InspectorMock extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(12),
       children: <Widget>[
-        _Property(name: 'Active (center)', value: centerId == null ? '—' : m.descriptor(centerId).title),
+        _Property(
+          name: 'Active (center)',
+          value: centerId == null ? '—' : m.descriptor(centerId).title,
+        ),
         _Property(name: 'Center layout', value: _layout(m, DockSide.center)),
         _Property(name: 'Floating windows', value: '${m.floatingIds.length}'),
         const Divider(height: 20),
@@ -542,7 +573,10 @@ class _Property extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.primary),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
         ],

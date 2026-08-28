@@ -28,6 +28,10 @@ This package uses Flutter's **experimental** windowing feature:
   `FlutterEngine` in `AppDelegate` and a windowless storyboard (otherwise
   `enableMultiView` aborts). See the example app's `macos/Runner`.
 
+See Flutter's official
+[Desktop Windowing API introduction](https://flutter.dev/blog/desktop-windowing-apis)
+for the API's design and a minimal example.
+
 The native dock helper ships in this plugin (Swift + FFI, resolved via
 `DynamicLibrary.process()`), so consuming apps need no Swift in their Runner
 beyond the bootstrap above. Supports both Swift Package Manager and CocoaPods.

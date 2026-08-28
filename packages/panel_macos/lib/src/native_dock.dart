@@ -43,7 +43,9 @@ class NativeDock {
   /// Lazily-resolved FFI bindings. The symbols live in this plugin's framework,
   /// so we search the whole process (RTLD_DEFAULT) rather than just the
   /// executable.
-  late final PanelMacosBindings _bindings = PanelMacosBindings(DynamicLibrary.process());
+  late final PanelMacosBindings _bindings = PanelMacosBindings(
+    DynamicLibrary.process(),
+  );
 
   /// Called continuously while a panel window is dragged, with the dragged
   /// window frame, the main-window frame, and the live pointer location (all in
@@ -66,7 +68,10 @@ class NativeDock {
     // native side invokes it from AppKit's main thread.
     _dragCallable = NativeCallable<PanesDragCallbackFunction>.listener(_onDrag);
     _dropCallable = NativeCallable<PanesDropCallbackFunction>.listener(_onDrop);
-    _bindings.panes_dock_register(_dragCallable!.nativeFunction, _dropCallable!.nativeFunction);
+    _bindings.panes_dock_register(
+      _dragCallable!.nativeFunction,
+      _dropCallable!.nativeFunction,
+    );
   }
 
   void _onDrag(
@@ -112,17 +117,17 @@ class NativeDock {
 
   /// Hides the title bar of the window with [token] and makes it draggable, and
   /// starts reporting its drags.
-  Future<void> decorate(String token) async {
+  void decorate(String token) {
     if (_supported) _withToken(_bindings.panes_dock_decorate, token);
   }
 
   /// Begins a native window-move drag for the window with [token].
-  Future<void> startWindowDrag(String token) async {
+  void startWindowDrag(String token) {
     if (_supported) _withToken(_bindings.panes_dock_start_window_drag, token);
   }
 
   /// Makes the main window's title bar transparent/full-size.
-  Future<void> decorateMain() async {
+  void decorateMain() {
     if (_supported) _bindings.panes_dock_decorate_main();
   }
 }

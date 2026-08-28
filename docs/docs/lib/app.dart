@@ -38,12 +38,11 @@ class App extends StatelessComponent {
           demo: 'regions',
           dataTitle: 'Regions',
           kicker: 'Layout · Regions',
-          title: 'Regions hold panels; add them live',
+          title: 'Add panels wherever they belong',
           desc: [
             Component.text(
-              'Each side is a region holding side-by-side groups of tabs. '
-              'Use the buttons to add panels and watch them dock; drag a tab onto a group '
-              'edge to split it.',
+              'Each side can hold one or more tab groups. Use the buttons to add '
+              'panels, or drag a tab to an edge to place it beside another group.',
             ),
           ],
         ),
@@ -63,15 +62,12 @@ class App extends StatelessComponent {
         _demoSlide(
           demo: 'themes',
           dataTitle: 'Themes',
-          kicker: 'Theming · PanelTheme',
-          title: 'Themeable, no Material tint',
+          kicker: 'Make it yours',
+          title: 'Match the rest of your app',
           desc: [
-            Component.text('The dock paints from a '),
+            Component.text('Choose the dock colors, tab shape, borders, and dividers with '),
             code([Component.text('PanelTheme')]),
-            Component.text(
-              ': colors, tab shape (square / rounded / pill) and chrome '
-              '(borders, dividers). Pick one:',
-            ),
+            Component.text('. Try one:'),
           ],
         ),
         RawText(blockC),
