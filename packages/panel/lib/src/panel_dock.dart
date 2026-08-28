@@ -15,7 +15,8 @@
 // Platform-generic: no windowing/native imports. Detaching is delegated to the
 // manager's backend via `manager.detach(id)`.
 
-import 'package:flutter/material.dart' show Icons, Tooltip, IconButton, VisualDensity;
+import 'package:flutter/material.dart'
+    show Icons, Tooltip, IconButton, VisualDensity;
 import 'package:flutter/widgets.dart';
 
 import 'panel.dart';
@@ -42,9 +43,15 @@ class PanelDock extends StatelessWidget {
     return Stack(
       children: <Widget>[
         Positioned.fill(child: _DockArea(manager: manager, onDetach: detach)),
-        if (manager.isDragging) Positioned.fill(child: _EmptyRegionTargets(manager: manager)),
+        if (manager.isDragging)
+          Positioned.fill(child: _EmptyRegionTargets(manager: manager)),
         if (manager.externalHoverSide != null)
-          Positioned.fill(child: _NativeDropZoneOverlay(manager: manager, activeSide: manager.externalHoverSide!)),
+          Positioned.fill(
+            child: _NativeDropZoneOverlay(
+              manager: manager,
+              activeSide: manager.externalHoverSide!,
+            ),
+          ),
       ],
     );
   }
@@ -66,9 +73,16 @@ class _DockArea extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints c) {
           double leftW = manager.sizeOf(DockSide.left);
           double rightW = manager.sizeOf(DockSide.right);
-          final bool hasLeft = manager.hasPanels(DockSide.left) && !manager.isCollapsed(DockSide.left);
-          final bool hasRight = manager.hasPanels(DockSide.right) && !manager.isCollapsed(DockSide.right);
-          final double sidesAvail = (c.maxWidth - cfg.minCenterWidth).clamp(0.0, c.maxWidth);
+          final bool hasLeft =
+              manager.hasPanels(DockSide.left) &&
+              !manager.isCollapsed(DockSide.left);
+          final bool hasRight =
+              manager.hasPanels(DockSide.right) &&
+              !manager.isCollapsed(DockSide.right);
+          final double sidesAvail = (c.maxWidth - cfg.minCenterWidth).clamp(
+            0.0,
+            c.maxWidth,
+          );
           final double usedLeft = hasLeft ? leftW : 0;
           final double usedRight = hasRight ? rightW : 0;
           if (usedLeft + usedRight > sidesAvail && usedLeft + usedRight > 0) {
@@ -76,31 +90,66 @@ class _DockArea extends StatelessWidget {
             leftW *= scale;
             rightW *= scale;
           }
-          final double bottomMax = (c.maxHeight - cfg.minCenterHeight).clamp(cfg.minDockExtent, c.maxHeight);
-          final double bottomH = manager.sizeOf(DockSide.bottom).clamp(cfg.minDockExtent, bottomMax);
+          final double bottomMax = (c.maxHeight - cfg.minCenterHeight).clamp(
+            cfg.minDockExtent,
+            c.maxHeight,
+          );
+          final double bottomH = manager
+              .sizeOf(DockSide.bottom)
+              .clamp(cfg.minDockExtent, bottomMax);
 
           final List<Widget> row = <Widget>[];
           if (manager.hasPanels(DockSide.left)) {
             row.add(_sideDock(DockSide.left, leftW));
             if (!manager.isCollapsed(DockSide.left)) {
-              row.add(_splitter(t, Axis.vertical, (double d) => manager.setSize(DockSide.left, manager.sizeOf(DockSide.left) + d)));
+              row.add(
+                _splitter(
+                  t,
+                  Axis.vertical,
+                  (double d) => manager.setSize(
+                    DockSide.left,
+                    manager.sizeOf(DockSide.left) + d,
+                  ),
+                ),
+              );
             }
           }
-          row.add(Expanded(child: _CenterArea(manager: manager, onDetach: onDetach)));
+          row.add(
+            Expanded(child: _CenterArea(manager: manager, onDetach: onDetach)),
+          );
           if (manager.hasPanels(DockSide.right)) {
             if (!manager.isCollapsed(DockSide.right)) {
-              row.add(_splitter(t, Axis.vertical, (double d) => manager.setSize(DockSide.right, manager.sizeOf(DockSide.right) - d)));
+              row.add(
+                _splitter(
+                  t,
+                  Axis.vertical,
+                  (double d) => manager.setSize(
+                    DockSide.right,
+                    manager.sizeOf(DockSide.right) - d,
+                  ),
+                ),
+              );
             }
             row.add(_sideDock(DockSide.right, rightW));
           }
 
-          Widget content = Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: row);
+          Widget content = Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: row,
+          );
           if (manager.hasPanels(DockSide.bottom)) {
             content = Column(
               children: <Widget>[
                 Expanded(child: content),
                 if (!manager.isCollapsed(DockSide.bottom))
-                  _splitter(t, Axis.horizontal, (double d) => manager.setSize(DockSide.bottom, manager.sizeOf(DockSide.bottom) - d)),
+                  _splitter(
+                    t,
+                    Axis.horizontal,
+                    (double d) => manager.setSize(
+                      DockSide.bottom,
+                      manager.sizeOf(DockSide.bottom) - d,
+                    ),
+                  ),
                 _bottomDock(bottomH),
               ],
             );
@@ -111,7 +160,8 @@ class _DockArea extends StatelessWidget {
     );
   }
 
-  Widget _splitter(PanelTheme t, Axis axis, ValueChanged<double> onDrag) => _Splitter(
+  Widget _splitter(PanelTheme t, Axis axis, ValueChanged<double> onDrag) =>
+      _Splitter(
         axis: axis,
         theme: t,
         enabled: manager.config.allowResize,
@@ -122,18 +172,41 @@ class _DockArea extends StatelessWidget {
 
   Widget _sideDock(DockSide side, double width) {
     if (manager.isCollapsed(side)) {
-      return _CollapsedDock(manager: manager, side: side, axis: Axis.vertical, extent: manager.config.collapsedExtent);
+      return _CollapsedDock(
+        manager: manager,
+        side: side,
+        axis: Axis.vertical,
+        extent: manager.config.collapsedExtent,
+      );
     }
-    return SizedBox(width: width, child: _RegionView(manager: manager, side: side, axis: Axis.vertical, onDetach: onDetach));
+    return SizedBox(
+      width: width,
+      child: _RegionView(
+        manager: manager,
+        side: side,
+        axis: Axis.vertical,
+        onDetach: onDetach,
+      ),
+    );
   }
 
   Widget _bottomDock(double height) {
     if (manager.isCollapsed(DockSide.bottom)) {
-      return _CollapsedDock(manager: manager, side: DockSide.bottom, axis: Axis.horizontal, extent: manager.config.collapsedExtent);
+      return _CollapsedDock(
+        manager: manager,
+        side: DockSide.bottom,
+        axis: Axis.horizontal,
+        extent: manager.config.collapsedExtent,
+      );
     }
     return SizedBox(
       height: height,
-      child: _RegionView(manager: manager, side: DockSide.bottom, axis: Axis.horizontal, onDetach: onDetach),
+      child: _RegionView(
+        manager: manager,
+        side: DockSide.bottom,
+        axis: Axis.horizontal,
+        onDetach: onDetach,
+      ),
     );
   }
 }
@@ -156,23 +229,41 @@ class _CenterArea extends StatelessWidget {
         builder: (BuildContext context, List<_TabDrag?> cand, _) {
           final bool active = cand.isNotEmpty;
           return Container(
-            color: active ? Color.alphaBlend(t.accent.withValues(alpha: 0.12), t.surface) : t.surface,
+            color:
+                active
+                    ? Color.alphaBlend(
+                      t.accent.withValues(alpha: 0.12),
+                      t.surface,
+                    )
+                    : t.surface,
             alignment: Alignment.center,
             child: Text(
-              manager.isDragging ? manager.config.strings.dropHere : manager.config.strings.emptyCenter,
+              manager.isDragging
+                  ? manager.config.strings.dropHere
+                  : manager.config.strings.emptyCenter,
               style: TextStyle(color: t.mutedText, fontSize: 13),
             ),
           );
         },
       );
     }
-    return _RegionView(manager: manager, side: DockSide.center, axis: Axis.horizontal, onDetach: onDetach);
+    return _RegionView(
+      manager: manager,
+      side: DockSide.center,
+      axis: Axis.horizontal,
+      onDetach: onDetach,
+    );
   }
 }
 
 /// Lays out a region's groups along [axis] with weighted splitters between them.
 class _RegionView extends StatelessWidget {
-  const _RegionView({required this.manager, required this.side, required this.axis, required this.onDetach});
+  const _RegionView({
+    required this.manager,
+    required this.side,
+    required this.axis,
+    required this.onDetach,
+  });
 
   final PanelManager manager;
   final DockSide side;
@@ -192,24 +283,45 @@ class _RegionView extends StatelessWidget {
         for (int gi = 0; gi < n; gi++) {
           if (gi > 0) {
             final int leftIndex = gi - 1;
-            children.add(_Splitter(
-              axis: horizontal ? Axis.vertical : Axis.horizontal,
-              theme: t,
-              enabled: manager.config.allowResize,
-              hitSize: manager.config.splitterHitSize,
-              duration: manager.config.splitterDuration,
-              onDrag: (double d) => manager.adjustGroupWeights(side, leftIndex, d, total),
-            ));
+            children.add(
+              _Splitter(
+                axis: horizontal ? Axis.vertical : Axis.horizontal,
+                theme: t,
+                enabled: manager.config.allowResize,
+                hitSize: manager.config.splitterHitSize,
+                duration: manager.config.splitterDuration,
+                onDrag:
+                    (double d) =>
+                        manager.adjustGroupWeights(side, leftIndex, d, total),
+              ),
+            );
           }
-          final int flex = (manager.groupWeight(side, gi) * 1000).round().clamp(1, 1 << 22);
-          children.add(Expanded(
-            flex: flex,
-            child: PanelGroup(manager: manager, side: side, groupIndex: gi, axis: axis, onDetach: onDetach),
-          ));
+          final int flex = (manager.groupWeight(side, gi) * 1000).round().clamp(
+            1,
+            1 << 22,
+          );
+          children.add(
+            Expanded(
+              flex: flex,
+              child: PanelGroup(
+                manager: manager,
+                side: side,
+                groupIndex: gi,
+                axis: axis,
+                onDetach: onDetach,
+              ),
+            ),
+          );
         }
         return horizontal
-            ? Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: children)
-            : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children);
+            ? Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            )
+            : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            );
       },
     );
   }
@@ -235,7 +347,10 @@ class PanelGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PanelTheme t = manager.config.themeOf(context);
-    final List<PanelDescriptor> panels = manager.panelsInGroup(side, groupIndex);
+    final List<PanelDescriptor> panels = manager.panelsInGroup(
+      side,
+      groupIndex,
+    );
     final String? activeId = manager.activeInGroup(side, groupIndex);
     PanelDescriptor? active;
     for (final PanelDescriptor p in panels) {
@@ -251,9 +366,12 @@ class PanelGroup extends StatelessWidget {
       decoration: BoxDecoration(
         color: t.surface,
         // Focus ring always shows; the resting hairline is themeable away.
-        border: focused
-            ? Border.all(color: t.accent, width: 1.5)
-            : (t.showPanelBorder ? Border.all(color: t.border, width: 1) : null),
+        border:
+            focused
+                ? Border.all(color: t.accent, width: 1.5)
+                : (t.showPanelBorder
+                    ? Border.all(color: t.border, width: 1)
+                    : null),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -267,11 +385,16 @@ class PanelGroup extends StatelessWidget {
             canSplit: panels.length >= 2,
             onDetach: onDetach,
           ),
-          if (t.tabDividerThickness > 0) Container(height: t.tabDividerThickness, color: t.border),
+          if (t.tabDividerThickness > 0)
+            Container(height: t.tabDividerThickness, color: t.border),
           Expanded(
-            child: active == null
-                ? const SizedBox.shrink()
-                : KeyedSubtree(key: ValueKey<String>('panel-body-${active.id}'), child: active.builder(context)),
+            child:
+                active == null
+                    ? const SizedBox.shrink()
+                    : KeyedSubtree(
+                      key: ValueKey<String>('panel-body-${active.id}'),
+                      child: active.builder(context),
+                    ),
           ),
         ],
       ),
@@ -280,20 +403,26 @@ class PanelGroup extends StatelessWidget {
     // The drop-zone overlay covers only the body (below the tab strip), leaving
     // the strip free for tab drag-to-reorder targets.
     final double stripH = manager.config.tabStripHeight + t.tabDividerThickness;
-    final Widget body = !manager.isDragging
-        ? group
-        : Stack(
-            children: <Widget>[
-              Positioned.fill(child: group),
-              Positioned(
-                top: stripH,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: _GroupDropZones(manager: manager, side: side, groupIndex: groupIndex, axis: axis),
-              ),
-            ],
-          );
+    final Widget body =
+        !manager.isDragging
+            ? group
+            : Stack(
+              children: <Widget>[
+                Positioned.fill(child: group),
+                Positioned(
+                  top: stripH,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _GroupDropZones(
+                    manager: manager,
+                    side: side,
+                    groupIndex: groupIndex,
+                    axis: axis,
+                  ),
+                ),
+              ],
+            );
     // Clicking anywhere in the group focuses it (target for split/merge keys).
     return Listener(
       onPointerDown: (_) => manager.setFocusedGroup(side, groupIndex),
@@ -326,7 +455,8 @@ class _TabStrip extends StatelessWidget {
     final PanelDockConfig cfg = manager.config;
     final PanelTheme t = cfg.themeOf(context);
     final PanelDockStrings str = cfg.strings;
-    final bool showCollapse = cfg.allowCollapse && side != DockSide.center && groupIndex == 0;
+    final bool showCollapse =
+        cfg.allowCollapse && side != DockSide.center && groupIndex == 0;
     return Container(
       height: cfg.tabStripHeight,
       color: t.tabBar,
@@ -337,7 +467,14 @@ class _TabStrip extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               children: <Widget>[
                 for (final PanelDescriptor p in panels)
-                  _Tab(manager: manager, side: side, groupIndex: groupIndex, descriptor: p, selected: p.id == activeId, onDetach: onDetach),
+                  _Tab(
+                    manager: manager,
+                    side: side,
+                    groupIndex: groupIndex,
+                    descriptor: p,
+                    selected: p.id == activeId,
+                    onDetach: onDetach,
+                  ),
               ],
             ),
           ),
@@ -345,13 +482,26 @@ class _TabStrip extends StatelessWidget {
             _StripButton(
               tooltip: str.splitTooltip,
               color: t.mutedText,
-              icon: side == DockSide.bottom || side == DockSide.center ? Icons.splitscreen : Icons.horizontal_split,
+              icon:
+                  side == DockSide.bottom || side == DockSide.center
+                      ? Icons.splitscreen
+                      : Icons.horizontal_split,
               onPressed: () => manager.splitActiveGroup(side, groupIndex),
             ),
           if (cfg.allowDetach && manager.supportsDetach && activeId != null)
-            _StripButton(tooltip: str.detachTooltip, color: t.mutedText, icon: Icons.open_in_new, onPressed: () => onDetach(activeId!)),
+            _StripButton(
+              tooltip: str.detachTooltip,
+              color: t.mutedText,
+              icon: Icons.open_in_new,
+              onPressed: () => onDetach(activeId!),
+            ),
           if (showCollapse)
-            _StripButton(tooltip: str.minimizeDock(side), color: t.mutedText, icon: Icons.remove, onPressed: () => manager.toggleCollapsed(side)),
+            _StripButton(
+              tooltip: str.minimizeDock(side),
+              color: t.mutedText,
+              icon: Icons.remove,
+              onPressed: () => manager.toggleCollapsed(side),
+            ),
         ],
       ),
     );
@@ -359,7 +509,12 @@ class _TabStrip extends StatelessWidget {
 }
 
 class _StripButton extends StatelessWidget {
-  const _StripButton({required this.tooltip, required this.icon, required this.color, required this.onPressed});
+  const _StripButton({
+    required this.tooltip,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+  });
 
   final String tooltip;
   final IconData icon;
@@ -405,10 +560,24 @@ class _Tab extends StatefulWidget {
 class _TabState extends State<_Tab> {
   bool _hovered = false;
 
-  Widget _label(BuildContext context, PanelTheme t, {required bool selected, required bool hovered}) {
-    final PanelTabSpec spec = PanelTabSpec(descriptor: widget.descriptor, selected: selected, hovered: hovered, theme: t);
-    final Widget? custom = widget.manager.config.tabBuilder?.call(context, spec);
-    return custom ?? _TabLabel(spec: spec, duration: widget.manager.config.hoverDuration);
+  Widget _label(
+    BuildContext context,
+    PanelTheme t, {
+    required bool selected,
+    required bool hovered,
+  }) {
+    final PanelTabSpec spec = PanelTabSpec(
+      descriptor: widget.descriptor,
+      selected: selected,
+      hovered: hovered,
+      theme: t,
+    );
+    final Widget? custom = widget.manager.config.tabBuilder?.call(
+      context,
+      spec,
+    );
+    return custom ??
+        _TabLabel(spec: spec, duration: widget.manager.config.hoverDuration);
   }
 
   /// One half of a tab's reorder hit area. Dropping here inserts the dragged
@@ -418,13 +587,23 @@ class _TabState extends State<_Tab> {
     return DragTarget<_TabDrag>(
       onWillAcceptWithDetails: (_) => true,
       onAcceptWithDetails: (DragTargetDetails<_TabDrag> d) {
-        widget.manager.movePanelToGroupAt(d.data.panelId, widget.side, widget.groupIndex, before ? idx : idx + 1);
+        widget.manager.movePanelToGroupAt(
+          d.data.panelId,
+          widget.side,
+          widget.groupIndex,
+          before ? idx : idx + 1,
+        );
         widget.manager.endDrag();
       },
-      builder: (BuildContext context, List<_TabDrag?> cand, _) => Container(
-        alignment: before ? Alignment.centerLeft : Alignment.centerRight,
-        child: Container(width: 2.5, height: double.infinity, color: cand.isNotEmpty ? t.accent : const Color(0x00000000)),
-      ),
+      builder:
+          (BuildContext context, List<_TabDrag?> cand, _) => Container(
+            alignment: before ? Alignment.centerLeft : Alignment.centerRight,
+            child: Container(
+              width: 2.5,
+              height: double.infinity,
+              color: cand.isNotEmpty ? t.accent : const Color(0x00000000),
+            ),
+          ),
     );
   }
 
@@ -448,16 +627,26 @@ class _TabState extends State<_Tab> {
   Widget _wrapReorder(PanelTheme t, Widget content) {
     final PanelManager m = widget.manager;
     if (!m.isDragging) return content;
-    final List<PanelDescriptor> panels = m.panelsInGroup(widget.side, widget.groupIndex);
-    final int idx = panels.indexWhere((PanelDescriptor p) => p.id == widget.descriptor.id);
+    final List<PanelDescriptor> panels = m.panelsInGroup(
+      widget.side,
+      widget.groupIndex,
+    );
+    final int idx = panels.indexWhere(
+      (PanelDescriptor p) => p.id == widget.descriptor.id,
+    );
     if (idx < 0) return content;
 
     final bool isSource = m.isDragSource(widget.side, widget.groupIndex);
-    final int draggedIdx = isSource ? panels.indexWhere((PanelDescriptor p) => p.id == m.draggedPanelId) : -1;
+    final int draggedIdx =
+        isSource
+            ? panels.indexWhere((PanelDescriptor p) => p.id == m.draggedPanelId)
+            : -1;
     // A gap is a no-op if it sits immediately before/after the dragged tab.
     // before-half = gap `idx`; after-half = gap `idx + 1`.
-    final bool showBefore = !isSource || (idx != draggedIdx && idx != draggedIdx + 1);
-    final bool showAfter = !isSource || (idx != draggedIdx && idx != draggedIdx - 1);
+    final bool showBefore =
+        !isSource || (idx != draggedIdx && idx != draggedIdx + 1);
+    final bool showAfter =
+        !isSource || (idx != draggedIdx && idx != draggedIdx - 1);
     if (!showBefore && !showAfter) return content;
 
     // StackFit.passthrough forwards the tab strip's tight height to [content],
@@ -471,8 +660,12 @@ class _TabState extends State<_Tab> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Expanded(child: showBefore ? _reorderHalf(t, idx, true) : _noopHalf()),
-              Expanded(child: showAfter ? _reorderHalf(t, idx, false) : _noopHalf()),
+              Expanded(
+                child: showBefore ? _reorderHalf(t, idx, true) : _noopHalf(),
+              ),
+              Expanded(
+                child: showAfter ? _reorderHalf(t, idx, false) : _noopHalf(),
+              ),
             ],
           ),
         ),
@@ -487,16 +680,28 @@ class _TabState extends State<_Tab> {
     return Draggable<_TabDrag>(
       data: _TabDrag(widget.descriptor.id),
       dragAnchorStrategy: pointerDragAnchorStrategy,
-      onDragStarted: () => widget.manager.beginDrag(side: widget.side, group: widget.groupIndex, panelId: widget.descriptor.id),
+      onDragStarted:
+          () => widget.manager.beginDrag(
+            side: widget.side,
+            group: widget.groupIndex,
+            panelId: widget.descriptor.id,
+          ),
       onDragEnd: (_) => widget.manager.endDrag(),
       onDraggableCanceled: (_, _) {
-        if (widget.manager.config.allowDetach && widget.manager.supportsDetach) {
+        if (widget.manager.config.allowDetach &&
+            widget.manager.supportsDetach) {
           widget.onDetach(widget.descriptor.id);
         }
         widget.manager.endDrag();
       },
-      feedback: _DragFeedback(theme: t, child: _label(context, t, selected: true, hovered: false)),
-      childWhenDragging: Opacity(opacity: 0.35, child: _label(context, t, selected: widget.selected, hovered: false)),
+      feedback: _DragFeedback(
+        theme: t,
+        child: _label(context, t, selected: true, hovered: false),
+      ),
+      childWhenDragging: Opacity(
+        opacity: 0.35,
+        child: _label(context, t, selected: widget.selected, hovered: false),
+      ),
       child: _wrapReorder(
         t,
         MouseRegion(
@@ -504,8 +709,18 @@ class _TabState extends State<_Tab> {
           onExit: (_) => setState(() => _hovered = false),
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
-            onTap: () => widget.manager.setActiveInGroup(widget.side, widget.groupIndex, widget.descriptor.id),
-            child: _label(context, t, selected: widget.selected, hovered: _hovered),
+            onTap:
+                () => widget.manager.setActiveInGroup(
+                  widget.side,
+                  widget.groupIndex,
+                  widget.descriptor.id,
+                ),
+            child: _label(
+              context,
+              t,
+              selected: widget.selected,
+              hovered: _hovered,
+            ),
           ),
         ),
       ),
@@ -525,9 +740,18 @@ class _DragFeedback extends StatelessWidget {
         color: theme.tabActive,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: theme.border),
-        boxShadow: <BoxShadow>[BoxShadow(color: const Color(0x33000000), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: const Color(0x33000000),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), child: child),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: child,
+      ),
     );
   }
 }
@@ -543,7 +767,10 @@ class _TabLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PanelTheme t = spec.theme;
-    final Color bg = spec.selected ? t.tabActive : (spec.hovered ? t.tabHover : const Color(0x00000000));
+    final Color bg =
+        spec.selected
+            ? t.tabActive
+            : (spec.hovered ? t.tabHover : const Color(0x00000000));
     final TextStyle base = t.tabTextStyle ?? const TextStyle(fontSize: 13);
     // Rounded/pill tabs indicate selection by fill (a uniform radius can't be
     // combined with a single-side underline); square tabs use the underline.
@@ -551,20 +778,33 @@ class _TabLabel extends StatelessWidget {
     return AnimatedContainer(
       duration: duration,
       curve: Curves.easeOut,
-      margin: rounded ? const EdgeInsets.symmetric(vertical: 4, horizontal: 2) : EdgeInsets.zero,
+      margin:
+          rounded
+              ? const EdgeInsets.symmetric(vertical: 4, horizontal: 2)
+              : EdgeInsets.zero,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: rounded ? t.tabRadius : null,
-        border: (!rounded && t.tabUnderlineThickness > 0)
-            ? Border(bottom: BorderSide(color: spec.selected ? t.accent : const Color(0x00000000), width: t.tabUnderlineThickness))
-            : null,
+        border:
+            (!rounded && t.tabUnderlineThickness > 0)
+                ? Border(
+                  bottom: BorderSide(
+                    color: spec.selected ? t.accent : const Color(0x00000000),
+                    width: t.tabUnderlineThickness,
+                  ),
+                )
+                : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (spec.descriptor.icon != null) ...<Widget>[
-            Icon(spec.descriptor.icon, size: 15, color: spec.selected ? t.accent : t.mutedText),
+            Icon(
+              spec.descriptor.icon,
+              size: 15,
+              color: spec.selected ? t.accent : t.mutedText,
+            ),
             const SizedBox(width: 6),
           ],
           Text(
@@ -583,7 +823,12 @@ class _TabLabel extends StatelessWidget {
 /// In-group drop zones shown during a drag: center = add tab, leading/trailing
 /// edge = split into a new group. Paints a clear preview of where it'll land.
 class _GroupDropZones extends StatefulWidget {
-  const _GroupDropZones({required this.manager, required this.side, required this.groupIndex, required this.axis});
+  const _GroupDropZones({
+    required this.manager,
+    required this.side,
+    required this.groupIndex,
+    required this.axis,
+  });
 
   final PanelManager manager;
   final DockSide side;
@@ -604,9 +849,19 @@ class _GroupDropZonesState extends State<_GroupDropZones> {
       case _Drop.tab:
         widget.manager.addPanelAsTab(id, widget.side, widget.groupIndex);
       case _Drop.before:
-        widget.manager.splitBeside(id, widget.side, widget.groupIndex, before: true);
+        widget.manager.splitBeside(
+          id,
+          widget.side,
+          widget.groupIndex,
+          before: true,
+        );
       case _Drop.after:
-        widget.manager.splitBeside(id, widget.side, widget.groupIndex, before: false);
+        widget.manager.splitBeside(
+          id,
+          widget.side,
+          widget.groupIndex,
+          before: false,
+        );
     }
     // The move rebuilds the tree and may dispose the source Draggable before its
     // onDragEnd fires, so end the drag explicitly here.
@@ -622,13 +877,20 @@ class _GroupDropZonesState extends State<_GroupDropZones> {
 
     // Dragging a tab back onto its own group is a no-op: don't offer "add tab"
     // here, and only offer split-out if the group has more than one tab.
-    final bool isSource = widget.manager.isDragSource(widget.side, widget.groupIndex);
-    final int tabCount = widget.manager.panelsInGroup(widget.side, widget.groupIndex).length;
+    final bool isSource = widget.manager.isDragSource(
+      widget.side,
+      widget.groupIndex,
+    );
+    final int tabCount =
+        widget.manager.panelsInGroup(widget.side, widget.groupIndex).length;
     final List<_Drop> kinds;
     if (!allowSplit) {
       kinds = isSource ? const <_Drop>[] : const <_Drop>[_Drop.tab];
     } else if (isSource) {
-      kinds = tabCount > 1 ? const <_Drop>[_Drop.before, _Drop.after] : const <_Drop>[];
+      kinds =
+          tabCount > 1
+              ? const <_Drop>[_Drop.before, _Drop.after]
+              : const <_Drop>[];
     } else {
       kinds = _Drop.values;
     }
@@ -642,20 +904,32 @@ class _GroupDropZonesState extends State<_GroupDropZones> {
         if (_hover == _Drop.tab) {
           preview = Rect.fromLTWH(0, 0, w, h);
         } else if (_hover == _Drop.before) {
-          preview = horizontal ? Rect.fromLTWH(0, 0, w * 0.5, h) : Rect.fromLTWH(0, 0, w, h * 0.5);
+          preview =
+              horizontal
+                  ? Rect.fromLTWH(0, 0, w * 0.5, h)
+                  : Rect.fromLTWH(0, 0, w, h * 0.5);
         } else if (_hover == _Drop.after) {
-          preview = horizontal ? Rect.fromLTWH(w * 0.5, 0, w * 0.5, h) : Rect.fromLTWH(0, h * 0.5, w, h * 0.5);
+          preview =
+              horizontal
+                  ? Rect.fromLTWH(w * 0.5, 0, w * 0.5, h)
+                  : Rect.fromLTWH(0, h * 0.5, w, h * 0.5);
         }
 
         Rect zoneRect(_Drop kind) {
           if (kind == _Drop.tab) {
             if (!allowSplit) return Rect.fromLTWH(0, 0, w, h);
-            return horizontal ? Rect.fromLTWH(w * edge, 0, w * (1 - 2 * edge), h) : Rect.fromLTWH(0, h * edge, w, h * (1 - 2 * edge));
+            return horizontal
+                ? Rect.fromLTWH(w * edge, 0, w * (1 - 2 * edge), h)
+                : Rect.fromLTWH(0, h * edge, w, h * (1 - 2 * edge));
           }
           if (kind == _Drop.before) {
-            return horizontal ? Rect.fromLTWH(0, 0, w * edge, h) : Rect.fromLTWH(0, 0, w, h * edge);
+            return horizontal
+                ? Rect.fromLTWH(0, 0, w * edge, h)
+                : Rect.fromLTWH(0, 0, w, h * edge);
           }
-          return horizontal ? Rect.fromLTWH(w * (1 - edge), 0, w * edge, h) : Rect.fromLTWH(0, h * (1 - edge), w, h * edge);
+          return horizontal
+              ? Rect.fromLTWH(w * (1 - edge), 0, w * edge, h)
+              : Rect.fromLTWH(0, h * (1 - edge), w, h * edge);
         }
 
         return Stack(
@@ -671,7 +945,11 @@ class _GroupDropZonesState extends State<_GroupDropZones> {
                   builder: (_, _, _) => const SizedBox.expand(),
                 ),
               ),
-            if (preview != null) Positioned.fromRect(rect: preview, child: _previewBox(t, _hover!)),
+            if (preview != null)
+              Positioned.fromRect(
+                rect: preview,
+                child: _previewBox(t, _hover!),
+              ),
             for (final _Drop kind in kinds)
               Positioned.fromRect(
                 rect: zoneRect(kind),
@@ -683,7 +961,9 @@ class _GroupDropZonesState extends State<_GroupDropZones> {
                   onLeave: (_) {
                     if (_hover == kind) setState(() => _hover = null);
                   },
-                  onAcceptWithDetails: (DragTargetDetails<_TabDrag> d) => _accept(kind, d.data.panelId),
+                  onAcceptWithDetails:
+                      (DragTargetDetails<_TabDrag> d) =>
+                          _accept(kind, d.data.panelId),
                   builder: (_, _, _) => const SizedBox.expand(),
                 ),
               ),
@@ -704,7 +984,10 @@ class _GroupDropZonesState extends State<_GroupDropZones> {
           borderRadius: BorderRadius.circular(8),
         ),
         alignment: Alignment.center,
-        child: Text(kind == _Drop.tab ? str.addTab : str.newGroup, style: TextStyle(color: t.accent, fontWeight: FontWeight.w700)),
+        child: Text(
+          kind == _Drop.tab ? str.addTab : str.newGroup,
+          style: TextStyle(color: t.accent, fontWeight: FontWeight.w700),
+        ),
       ),
     );
   }
@@ -712,7 +995,12 @@ class _GroupDropZonesState extends State<_GroupDropZones> {
 
 /// A collapsed (minimized) dock rendered as a thin strip that restores on tap.
 class _CollapsedDock extends StatelessWidget {
-  const _CollapsedDock({required this.manager, required this.side, required this.axis, required this.extent});
+  const _CollapsedDock({
+    required this.manager,
+    required this.side,
+    required this.axis,
+    required this.extent,
+  });
 
   final PanelManager manager;
   final DockSide side;
@@ -722,7 +1010,10 @@ class _CollapsedDock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PanelTheme t = manager.config.themeOf(context);
-    final String title = manager.panelsIn(side).map((PanelDescriptor p) => p.title).join('  ·  ');
+    final String title = manager
+        .panelsIn(side)
+        .map((PanelDescriptor p) => p.title)
+        .join('  ·  ');
     final Widget labelText = Text(
       title.isEmpty ? side.label : title,
       style: TextStyle(fontSize: 12, color: t.mutedText),
@@ -738,21 +1029,37 @@ class _CollapsedDock extends StatelessWidget {
           height: axis == Axis.horizontal ? extent : null,
           color: t.tabBar,
           padding: const EdgeInsets.all(6),
-          child: axis == Axis.vertical
-              ? Column(
-                  children: <Widget>[
-                    Icon(side == DockSide.left ? Icons.chevron_right : Icons.chevron_left, size: 16, color: t.mutedText),
-                    const SizedBox(height: 8),
-                    Expanded(child: RotatedBox(quarterTurns: 1, child: Center(child: labelText))),
-                  ],
-                )
-              : Row(
-                  children: <Widget>[
-                    Icon(Icons.keyboard_arrow_up, size: 16, color: t.mutedText),
-                    const SizedBox(width: 8),
-                    Expanded(child: labelText),
-                  ],
-                ),
+          child:
+              axis == Axis.vertical
+                  ? Column(
+                    children: <Widget>[
+                      Icon(
+                        side == DockSide.left
+                            ? Icons.chevron_right
+                            : Icons.chevron_left,
+                        size: 16,
+                        color: t.mutedText,
+                      ),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: RotatedBox(
+                          quarterTurns: 1,
+                          child: Center(child: labelText),
+                        ),
+                      ),
+                    ],
+                  )
+                  : Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.keyboard_arrow_up,
+                        size: 16,
+                        color: t.mutedText,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(child: labelText),
+                    ],
+                  ),
         ),
       ),
     );
@@ -790,24 +1097,41 @@ class _SplitterState extends State<_Splitter> {
     final PanelTheme t = widget.theme;
 
     if (!widget.enabled) {
-      return SizedBox(width: vertical ? 1 : null, height: vertical ? null : 1, child: ColoredBox(color: t.splitter));
+      return SizedBox(
+        width: vertical ? 1 : null,
+        height: vertical ? null : 1,
+        child: ColoredBox(color: t.splitter),
+      );
     }
 
     final Color lineColor = _active ? t.splitterActive : t.splitter;
     final double thickness = _active ? 2 : 1;
 
     return MouseRegion(
-      cursor: vertical ? SystemMouseCursors.resizeColumn : SystemMouseCursors.resizeRow,
+      cursor:
+          vertical
+              ? SystemMouseCursors.resizeColumn
+              : SystemMouseCursors.resizeRow,
       onEnter: (_) => setState(() => _active = true),
       onExit: (_) => setState(() => _active = false),
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onHorizontalDragStart: vertical ? (_) => setState(() => _active = true) : null,
-        onHorizontalDragEnd: vertical ? (_) => setState(() => _active = false) : null,
-        onHorizontalDragUpdate: vertical ? (DragUpdateDetails d) => widget.onDrag(d.delta.dx) : null,
-        onVerticalDragStart: vertical ? null : (_) => setState(() => _active = true),
-        onVerticalDragEnd: vertical ? null : (_) => setState(() => _active = false),
-        onVerticalDragUpdate: vertical ? null : (DragUpdateDetails d) => widget.onDrag(d.delta.dy),
+        onHorizontalDragStart:
+            vertical ? (_) => setState(() => _active = true) : null,
+        onHorizontalDragEnd:
+            vertical ? (_) => setState(() => _active = false) : null,
+        onHorizontalDragUpdate:
+            vertical
+                ? (DragUpdateDetails d) => widget.onDrag(d.delta.dx)
+                : null,
+        onVerticalDragStart:
+            vertical ? null : (_) => setState(() => _active = true),
+        onVerticalDragEnd:
+            vertical ? null : (_) => setState(() => _active = false),
+        onVerticalDragUpdate:
+            vertical
+                ? null
+                : (DragUpdateDetails d) => widget.onDrag(d.delta.dy),
         child: SizedBox(
           width: vertical ? widget.hitSize : null,
           height: vertical ? null : widget.hitSize,
@@ -838,9 +1162,30 @@ class _EmptyRegionTargets extends StatelessWidget {
     const double strip = 70;
     return Stack(
       children: <Widget>[
-        if (_empty(DockSide.left)) Positioned(left: 0, top: 0, bottom: 0, width: strip, child: _edge(context, DockSide.left)),
-        if (_empty(DockSide.right)) Positioned(right: 0, top: 0, bottom: 0, width: strip, child: _edge(context, DockSide.right)),
-        if (_empty(DockSide.bottom)) Positioned(left: strip, right: strip, bottom: 0, height: strip, child: _edge(context, DockSide.bottom)),
+        if (_empty(DockSide.left))
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: strip,
+            child: _edge(context, DockSide.left),
+          ),
+        if (_empty(DockSide.right))
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: strip,
+            child: _edge(context, DockSide.right),
+          ),
+        if (_empty(DockSide.bottom))
+          Positioned(
+            left: strip,
+            right: strip,
+            bottom: 0,
+            height: strip,
+            child: _edge(context, DockSide.bottom),
+          ),
       ],
     );
   }
@@ -858,11 +1203,18 @@ class _EmptyRegionTargets extends StatelessWidget {
           margin: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: t.accent.withValues(alpha: active ? 0.28 : 0.12),
-            border: Border.all(color: t.accent.withValues(alpha: active ? 0.9 : 0.45), width: active ? 2 : 1),
+            border: Border.all(
+              color: t.accent.withValues(alpha: active ? 0.9 : 0.45),
+              width: active ? 2 : 1,
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
-          child: Text(manager.config.strings.dockIntoLabel(side), textAlign: TextAlign.center, style: TextStyle(color: t.accent, fontWeight: FontWeight.w600)),
+          child: Text(
+            manager.config.strings.dockIntoLabel(side),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: t.accent, fontWeight: FontWeight.w600),
+          ),
         );
       },
     );
@@ -872,7 +1224,10 @@ class _EmptyRegionTargets extends StatelessWidget {
 /// Single drop-target preview shown while a detached OS window is dragged over
 /// the main window (Stage 2). Animates to the exact area the panel will occupy.
 class _NativeDropZoneOverlay extends StatelessWidget {
-  const _NativeDropZoneOverlay({required this.manager, required this.activeSide});
+  const _NativeDropZoneOverlay({
+    required this.manager,
+    required this.activeSide,
+  });
 
   final PanelManager manager;
   final DockSide activeSide;
@@ -885,8 +1240,16 @@ class _NativeDropZoneOverlay extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints c) {
           final double w = c.maxWidth;
           final double h = c.maxHeight;
-          double extent(DockSide side, double fallback, double maxFrac, double full) {
-            final double v = (manager.hasPanels(side) && !manager.isCollapsed(side)) ? manager.sizeOf(side) : fallback;
+          double extent(
+            DockSide side,
+            double fallback,
+            double maxFrac,
+            double full,
+          ) {
+            final double v =
+                (manager.hasPanels(side) && !manager.isCollapsed(side))
+                    ? manager.sizeOf(side)
+                    : fallback;
             return v.clamp(0.0, full * maxFrac);
           }
 
@@ -898,19 +1261,35 @@ class _NativeDropZoneOverlay extends StatelessWidget {
             DockSide.left => Rect.fromLTWH(0, 0, leftW, rowH),
             DockSide.right => Rect.fromLTWH(w - rightW, 0, rightW, rowH),
             DockSide.bottom => Rect.fromLTWH(0, rowH, w, bottomH),
-            DockSide.center => Rect.fromLTWH(leftW, 0, (w - leftW - rightW).clamp(0.0, w), rowH),
+            DockSide.center => Rect.fromLTWH(
+              leftW,
+              0,
+              (w - leftW - rightW).clamp(0.0, w),
+              rowH,
+            ),
           };
 
           final int groups = manager.groupCount(activeSide);
           if (!manager.config.redockAsTab && groups >= 1) {
             final double frac = 1 / (groups + 1);
-            final bool rowAxis = activeSide == DockSide.bottom || activeSide == DockSide.center;
+            final bool rowAxis =
+                activeSide == DockSide.bottom || activeSide == DockSide.center;
             if (rowAxis) {
               final double nw = target.width * frac;
-              target = Rect.fromLTWH(target.right - nw, target.top, nw, target.height);
+              target = Rect.fromLTWH(
+                target.right - nw,
+                target.top,
+                nw,
+                target.height,
+              );
             } else {
               final double nh = target.height * frac;
-              target = Rect.fromLTWH(target.left, target.bottom - nh, target.width, nh);
+              target = Rect.fromLTWH(
+                target.left,
+                target.bottom - nh,
+                target.width,
+                nh,
+              );
             }
           }
 
@@ -931,7 +1310,13 @@ class _NativeDropZoneOverlay extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   alignment: Alignment.center,
-                  child: Text(manager.config.strings.dockMenuItemLabel(activeSide), style: TextStyle(color: t.accent, fontWeight: FontWeight.w700)),
+                  child: Text(
+                    manager.config.strings.dockMenuItemLabel(activeSide),
+                    style: TextStyle(
+                      color: t.accent,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],

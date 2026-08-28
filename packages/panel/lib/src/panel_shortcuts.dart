@@ -13,7 +13,8 @@
 // );
 // ```
 
-import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -31,24 +32,37 @@ class MergePanelIntent extends Intent {
 
 /// Default key bindings: ⌘\ to split, ⌘⇧\ to merge (Ctrl on non-Apple).
 Map<ShortcutActivator, Intent> defaultPanelShortcuts() {
-  final bool apple = <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS}
-      .contains(defaultTargetPlatform);
+  final bool apple = <TargetPlatform>{
+    TargetPlatform.macOS,
+    TargetPlatform.iOS,
+  }.contains(defaultTargetPlatform);
   return <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.backslash, meta: apple, control: !apple): const SplitPanelIntent(),
-    SingleActivator(LogicalKeyboardKey.backslash, meta: apple, control: !apple, shift: true): const MergePanelIntent(),
+    SingleActivator(LogicalKeyboardKey.backslash, meta: apple, control: !apple):
+        const SplitPanelIntent(),
+    SingleActivator(
+          LogicalKeyboardKey.backslash,
+          meta: apple,
+          control: !apple,
+          shift: true,
+        ):
+        const MergePanelIntent(),
   };
 }
 
 /// Actions that route the panel intents to [manager].
 Map<Type, Action<Intent>> panelActions(PanelManager manager) {
   return <Type, Action<Intent>>{
-    SplitPanelIntent: CallbackAction<SplitPanelIntent>(onInvoke: (_) {
-      manager.splitFocused();
-      return null;
-    }),
-    MergePanelIntent: CallbackAction<MergePanelIntent>(onInvoke: (_) {
-      manager.mergeFocused();
-      return null;
-    }),
+    SplitPanelIntent: CallbackAction<SplitPanelIntent>(
+      onInvoke: (_) {
+        manager.splitFocused();
+        return null;
+      },
+    ),
+    MergePanelIntent: CallbackAction<MergePanelIntent>(
+      onInvoke: (_) {
+        manager.mergeFocused();
+        return null;
+      },
+    ),
   };
 }

@@ -18,11 +18,11 @@ enum DockSide { left, right, bottom, center }
 
 extension DockSideLabel on DockSide {
   String get label => switch (this) {
-        DockSide.left => 'Left',
-        DockSide.right => 'Right',
-        DockSide.bottom => 'Bottom',
-        DockSide.center => 'Center',
-      };
+    DockSide.left => 'Left',
+    DockSide.right => 'Right',
+    DockSide.bottom => 'Bottom',
+    DockSide.center => 'Center',
+  };
 
   /// Whether the region grows horizontally (side docks) or is the flexible
   /// center.

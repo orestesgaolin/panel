@@ -25,11 +25,21 @@
 /// See `package:panel_macos` to enable real detachable windows on macOS.
 library;
 
-export 'src/panel.dart' show DockSide, DockSideLabel, PanelContentBuilder, PanelDescriptor;
+export 'src/panel.dart'
+    show DockSide, DockSideLabel, PanelContentBuilder, PanelDescriptor;
 export 'src/panel_config.dart'
-    show PanelDockConfig, PanelDockStrings, PanelTheme, PanelTabSpec, PanelStorage;
+    show
+        PanelDockConfig,
+        PanelDockStrings,
+        PanelTheme,
+        PanelTabSpec,
+        PanelStorage;
 export 'src/panel_dock.dart' show PanelDock;
 export 'src/panel_manager.dart' show PanelManager, PanelScope;
 export 'src/panel_shortcuts.dart'
-    show MergePanelIntent, SplitPanelIntent, defaultPanelShortcuts, panelActions;
+    show
+        MergePanelIntent,
+        SplitPanelIntent,
+        defaultPanelShortcuts,
+        panelActions;
 export 'src/panel_windowing.dart' show PanelWindowingBackend, DisabledWindowing;

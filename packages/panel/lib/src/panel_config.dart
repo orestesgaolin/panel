@@ -98,37 +98,37 @@ class PanelTheme {
 
   /// A neutral light palette (no Material surface tint).
   factory PanelTheme.light() => const PanelTheme(
-        background: Color(0xFFF3F4F6),
-        surface: Color(0xFFFFFFFF),
-        tabBar: Color(0xFFEAECEF),
-        tabActive: Color(0xFFFFFFFF),
-        tabHover: Color(0x0D000000),
-        border: Color(0xFFD7DBE0),
-        accent: Color(0xFF3B82F6),
-        text: Color(0xFF1F2329),
-        mutedText: Color(0xFF6B7280),
-        splitter: Color(0xFFD7DBE0),
-        splitterActive: Color(0xFF3B82F6),
-        floatingHeader: Color(0xFFEAECEF),
-        overlayBackground: Color(0xFFFFFFFF),
-      );
+    background: Color(0xFFF3F4F6),
+    surface: Color(0xFFFFFFFF),
+    tabBar: Color(0xFFEAECEF),
+    tabActive: Color(0xFFFFFFFF),
+    tabHover: Color(0x0D000000),
+    border: Color(0xFFD7DBE0),
+    accent: Color(0xFF3B82F6),
+    text: Color(0xFF1F2329),
+    mutedText: Color(0xFF6B7280),
+    splitter: Color(0xFFD7DBE0),
+    splitterActive: Color(0xFF3B82F6),
+    floatingHeader: Color(0xFFEAECEF),
+    overlayBackground: Color(0xFFFFFFFF),
+  );
 
   /// A neutral dark palette (no Material surface tint).
   factory PanelTheme.dark() => const PanelTheme(
-        background: Color(0xFF1E1F22),
-        surface: Color(0xFF26282C),
-        tabBar: Color(0xFF2B2D31),
-        tabActive: Color(0xFF34373C),
-        tabHover: Color(0x14FFFFFF),
-        border: Color(0xFF3A3D42),
-        accent: Color(0xFF5B9DF7),
-        text: Color(0xFFE6E7E9),
-        mutedText: Color(0xFF9AA0A6),
-        splitter: Color(0xFF3A3D42),
-        splitterActive: Color(0xFF5B9DF7),
-        floatingHeader: Color(0xFF2B2D31),
-        overlayBackground: Color(0xFF26282C),
-      );
+    background: Color(0xFF1E1F22),
+    surface: Color(0xFF26282C),
+    tabBar: Color(0xFF2B2D31),
+    tabActive: Color(0xFF34373C),
+    tabHover: Color(0x14FFFFFF),
+    border: Color(0xFF3A3D42),
+    accent: Color(0xFF5B9DF7),
+    text: Color(0xFFE6E7E9),
+    mutedText: Color(0xFF9AA0A6),
+    splitter: Color(0xFF3A3D42),
+    splitterActive: Color(0xFF5B9DF7),
+    floatingHeader: Color(0xFF2B2D31),
+    overlayBackground: Color(0xFF26282C),
+  );
 }
 
 /// Passed to [PanelDockConfig.tabBuilder] so apps can render tabs arbitrarily.
@@ -205,8 +205,10 @@ class PanelDockStrings {
   /// Label for an entry in the floating window's "Dock to…" menu.
   final String Function(DockSide side) dockMenuItemLabel;
 
-  static String _defaultDockInto(DockSide side) => 'Dock\n${side.label.toLowerCase()}';
-  static String _defaultDockMenuItem(DockSide side) => 'Dock ${side.label.toLowerCase()}';
+  static String _defaultDockInto(DockSide side) =>
+      'Dock\n${side.label.toLowerCase()}';
+  static String _defaultDockMenuItem(DockSide side) =>
+      'Dock ${side.label.toLowerCase()}';
 
   /// Resolves [minimizeDockTooltip] for [side].
   String minimizeDock(DockSide side) =>
@@ -232,7 +234,10 @@ class PanelDockConfig {
     this.splitterHitSize = 8,
     this.dropEdgeFraction = 0.30,
     this.defaultDetachedSize = const Size(480, 600),
-    this.detachedConstraints = const BoxConstraints(minWidth: 240, minHeight: 200),
+    this.detachedConstraints = const BoxConstraints(
+      minWidth: 240,
+      minHeight: 200,
+    ),
     this.redockAsTab = false,
     this.allowDetach = true,
     this.allowSplit = true,
@@ -246,8 +251,8 @@ class PanelDockConfig {
     this.darkTheme,
     this.tabBuilder,
     this.storage,
-  })  : assert(dropEdgeFraction > 0 && dropEdgeFraction < 0.5),
-        assert(minGroupFraction > 0 && minGroupFraction < 0.5);
+  }) : assert(dropEdgeFraction > 0 && dropEdgeFraction < 0.5),
+       assert(minGroupFraction > 0 && minGroupFraction < 0.5);
 
   /// Initial widths/height of the side docks, in logical pixels.
   final double leftDockSize;
@@ -320,17 +325,20 @@ class PanelDockConfig {
 
   /// Resolves the active [PanelTheme] for [context]'s platform brightness.
   PanelTheme themeOf(BuildContext context) {
-    final bool dark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-    return dark ? (darkTheme ?? PanelTheme.dark()) : (lightTheme ?? PanelTheme.light());
+    final bool dark =
+        MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    return dark
+        ? (darkTheme ?? PanelTheme.dark())
+        : (lightTheme ?? PanelTheme.light());
   }
 
   /// Initial size for [side]'s dock.
   double initialSize(DockSide side) => switch (side) {
-        DockSide.left => leftDockSize,
-        DockSide.right => rightDockSize,
-        DockSide.bottom => bottomDockSize,
-        DockSide.center => 0,
-      };
+    DockSide.left => leftDockSize,
+    DockSide.right => rightDockSize,
+    DockSide.bottom => bottomDockSize,
+    DockSide.center => 0,
+  };
 
   PanelDockConfig copyWith({
     double? leftDockSize,

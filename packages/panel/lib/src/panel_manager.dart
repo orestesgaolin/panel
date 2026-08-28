@@ -52,7 +52,8 @@ class PanelManager extends ChangeNotifier {
   }) {
     _windowing = windowing;
     _regions = <DockSide, _Region>{
-      for (final DockSide side in DockSide.values) side: _Region(config.initialSize(side)),
+      for (final DockSide side in DockSide.values)
+        side: _Region(config.initialSize(side)),
     };
     _windowing.attach(this);
   }
@@ -85,7 +86,8 @@ class PanelManager extends ChangeNotifier {
 
   /// Whether group [gi] of [side] is the group the in-flight drag came from.
   /// Drop targets use this to suppress no-op "drop onto yourself" actions.
-  bool isDragSource(DockSide side, int gi) => _dragSide == side && _dragGroup == gi;
+  bool isDragSource(DockSide side, int gi) =>
+      _dragSide == side && _dragGroup == gi;
 
   /// Called by the UI when a tab drag begins, with the tab's origin group and id.
   void beginDrag({DockSide? side, int? group, String? panelId}) {
@@ -109,7 +111,11 @@ class PanelManager extends ChangeNotifier {
   // ---- Registration --------------------------------------------------------
 
   /// Registers [descriptor] and docks it as a tab in [side]'s first group.
-  void registerPanel(PanelDescriptor descriptor, {DockSide side = DockSide.right, bool activate = true}) {
+  void registerPanel(
+    PanelDescriptor descriptor, {
+    DockSide side = DockSide.right,
+    bool activate = true,
+  }) {
     _descriptors[descriptor.id] = descriptor;
     final _Region region = _regions[side]!;
     if (region.groups.isEmpty) region.groups.add(_Group());
@@ -137,8 +143,7 @@ class PanelManager extends ChangeNotifier {
   int groupCount(DockSide side) => _regions[side]!.groups.length;
 
   /// All panels in [side], across every group, in visual order.
-  List<PanelDescriptor> panelsIn(DockSide side) => _regions[side]!
-      .groups
+  List<PanelDescriptor> panelsIn(DockSide side) => _regions[side]!.groups
       .expand((_Group g) => g.panelIds)
       .map((String id) => _descriptors[id]!)
       .toList(growable: false);
@@ -147,7 +152,9 @@ class PanelManager extends ChangeNotifier {
   List<PanelDescriptor> panelsInGroup(DockSide side, int gi) {
     final List<_Group> groups = _regions[side]!.groups;
     if (gi < 0 || gi >= groups.length) return const <PanelDescriptor>[];
-    return groups[gi].panelIds.map((String id) => _descriptors[id]!).toList(growable: false);
+    return groups[gi].panelIds
+        .map((String id) => _descriptors[id]!)
+        .toList(growable: false);
   }
 
   /// The selected panel id of group [gi] in [side], or null.
@@ -155,11 +162,14 @@ class PanelManager extends ChangeNotifier {
     final List<_Group> groups = _regions[side]!.groups;
     if (gi < 0 || gi >= groups.length) return null;
     final _Group g = groups[gi];
-    return g.panelIds.contains(g.activeId) ? g.activeId : (g.panelIds.isEmpty ? null : g.panelIds.first);
+    return g.panelIds.contains(g.activeId)
+        ? g.activeId
+        : (g.panelIds.isEmpty ? null : g.panelIds.first);
   }
 
   /// Active panel of the region's active group (handy for summaries).
-  String? activeIdOf(DockSide side) => activeInGroup(side, _regions[side]!.activeGroup);
+  String? activeIdOf(DockSide side) =>
+      activeInGroup(side, _regions[side]!.activeGroup);
 
   /// Relative flex weight of group [gi] within [side].
   double groupWeight(DockSide side, int gi) {
@@ -197,7 +207,12 @@ class PanelManager extends ChangeNotifier {
   }
 
   /// Shifts weight between group [gi] and [gi+1] by [deltaPx] of [totalPx].
-  void adjustGroupWeights(DockSide side, int gi, double deltaPx, double totalPx) {
+  void adjustGroupWeights(
+    DockSide side,
+    int gi,
+    double deltaPx,
+    double totalPx,
+  ) {
     final List<_Group> groups = _regions[side]!.groups;
     if (gi < 0 || gi + 1 >= groups.length || totalPx <= 0) return;
     final double sum = groups.fold(0.0, (double a, _Group g) => a + g.weight);
@@ -244,7 +259,8 @@ class PanelManager extends ChangeNotifier {
     }
     final _Group target = r.groups[gi];
     final ({DockSide side, int gi})? loc = _locOf(id);
-    final bool sameGroup = loc != null && identical(_regions[loc.side]!.groups[loc.gi], target);
+    final bool sameGroup =
+        loc != null && identical(_regions[loc.side]!.groups[loc.gi], target);
 
     if (sameGroup) {
       final int old = target.panelIds.indexOf(id);
@@ -285,14 +301,17 @@ class PanelManager extends ChangeNotifier {
     final _Group ref = r.groups[gi];
     final ({DockSide side, int gi})? loc = _locOf(id);
     // Dropping a single-panel group beside itself is a no-op.
-    if (loc != null && identical(_regions[loc.side]!.groups[loc.gi], ref) && ref.panelIds.length == 1) {
+    if (loc != null &&
+        identical(_regions[loc.side]!.groups[loc.gi], ref) &&
+        ref.panelIds.length == 1) {
       return;
     }
     final double w = ref.weight;
     _removeFromDock(id);
-    final _Group g = _Group(weight: w)
-      ..panelIds.add(id)
-      ..activeId = id;
+    final _Group g =
+        _Group(weight: w)
+          ..panelIds.add(id)
+          ..activeId = id;
     int idx = r.groups.indexOf(ref);
     idx = idx < 0 ? r.groups.length : (before ? idx : idx + 1);
     r.groups.insert(idx, g);
@@ -338,7 +357,8 @@ class PanelManager extends ChangeNotifier {
   int get focusedGroup => _focusedGroup;
 
   /// Whether group [gi] of [side] is the focused group.
-  bool isFocusedGroup(DockSide side, int gi) => _focusedSide == side && _focusedGroup == gi;
+  bool isFocusedGroup(DockSide side, int gi) =>
+      _focusedSide == side && _focusedGroup == gi;
 
   /// Records the focused group (e.g. on click); also makes it the active group.
   void setFocusedGroup(DockSide side, int gi) {
@@ -364,9 +384,10 @@ class PanelManager extends ChangeNotifier {
   void _addAsNewGroup(String id, DockSide side, int atIndex) {
     final _Region r = _regions[side]!;
     _removeFromDock(id);
-    final _Group g = _Group()
-      ..panelIds.add(id)
-      ..activeId = id;
+    final _Group g =
+        _Group()
+          ..panelIds.add(id)
+          ..activeId = id;
     final int idx = atIndex.clamp(0, r.groups.length);
     r.groups.insert(idx, g);
     r.activeGroup = idx;
@@ -400,9 +421,11 @@ class PanelManager extends ChangeNotifier {
       g.panelIds.add(id);
       g.activeId = id;
     } else {
-      r.groups.add(_Group()
-        ..panelIds.add(id)
-        ..activeId = id);
+      r.groups.add(
+        _Group()
+          ..panelIds.add(id)
+          ..activeId = id,
+      );
     }
     r.activeGroup = r.groups.length - 1;
     r.collapsed = false;
@@ -453,7 +476,9 @@ class PanelManager extends ChangeNotifier {
     final DockSide? side = _externalHoverSide;
     _externalDragging = false;
     _externalHoverSide = null;
-    if (commitId != null && side != null && _floatingOrigin.containsKey(commitId)) {
+    if (commitId != null &&
+        side != null &&
+        _floatingOrigin.containsKey(commitId)) {
       redock(commitId, toSide: side);
     } else {
       notifyListeners();
@@ -468,13 +493,29 @@ class PanelManager extends ChangeNotifier {
     if (!main.contains(pointer)) return null;
 
     double extent(DockSide side, double fallback, double maxFrac, double full) {
-      final double v = (hasPanels(side) && !isCollapsed(side)) ? sizeOf(side) : fallback;
+      final double v =
+          (hasPanels(side) && !isCollapsed(side)) ? sizeOf(side) : fallback;
       return v.clamp(0.0, full * maxFrac);
     }
 
-    final double leftW = extent(DockSide.left, main.width * 0.18, 0.45, main.width);
-    final double rightW = extent(DockSide.right, main.width * 0.20, 0.45, main.width);
-    final double bottomH = extent(DockSide.bottom, main.height * 0.22, 0.55, main.height);
+    final double leftW = extent(
+      DockSide.left,
+      main.width * 0.18,
+      0.45,
+      main.width,
+    );
+    final double rightW = extent(
+      DockSide.right,
+      main.width * 0.20,
+      0.45,
+      main.width,
+    );
+    final double bottomH = extent(
+      DockSide.bottom,
+      main.height * 0.22,
+      0.55,
+      main.height,
+    );
     final double x = pointer.dx - main.left;
     final double y = pointer.dy - main.top;
 
@@ -512,7 +553,10 @@ class PanelManager extends ChangeNotifier {
             'activeGroup': _regions[side]!.activeGroup,
             'groups': <Object?>[
               for (final _Group g in _regions[side]!.groups)
-                <String, Object?>{'active': g.activeId, 'panels': List<String>.from(g.panelIds)},
+                <String, Object?>{
+                  'active': g.activeId,
+                  'panels': List<String>.from(g.panelIds),
+                },
             ],
           },
       },
@@ -540,19 +584,29 @@ class PanelManager extends ChangeNotifier {
           for (final Object? gd in groups) {
             if (gd is! Map) continue;
             final List<String> ids = <String>[
-              for (final Object? id in (gd['panels'] as List? ?? const <Object?>[]))
-                if (id is String && known.contains(id) && !placed.contains(id) && !isFloating(id)) id,
+              for (final Object? id
+                  in (gd['panels'] as List? ?? const <Object?>[]))
+                if (id is String &&
+                    known.contains(id) &&
+                    !placed.contains(id) &&
+                    !isFloating(id))
+                  id,
             ];
             if (ids.isEmpty) continue;
             placed.addAll(ids);
             String? active = gd['active'] as String?;
             if (active == null || !ids.contains(active)) active = ids.first;
-            r.groups.add(_Group()
-              ..panelIds.addAll(ids)
-              ..activeId = active);
+            r.groups.add(
+              _Group()
+                ..panelIds.addAll(ids)
+                ..activeId = active,
+            );
           }
         }
-        r.activeGroup = ((rd['activeGroup'] as num?)?.toInt() ?? 0).clamp(0, r.groups.isEmpty ? 0 : r.groups.length - 1);
+        r.activeGroup = ((rd['activeGroup'] as num?)?.toInt() ?? 0).clamp(
+          0,
+          r.groups.isEmpty ? 0 : r.groups.length - 1,
+        );
       } else {
         r.size = config.initialSize(side);
         r.collapsed = false;
@@ -588,7 +642,9 @@ class PanelManager extends ChangeNotifier {
   ({DockSide side, int gi})? _locOf(String id) {
     for (final MapEntry<DockSide, _Region> e in _regions.entries) {
       for (int i = 0; i < e.value.groups.length; i++) {
-        if (e.value.groups[i].panelIds.contains(id)) return (side: e.key, gi: i);
+        if (e.value.groups[i].panelIds.contains(id)) {
+          return (side: e.key, gi: i);
+        }
       }
     }
     return null;
@@ -628,11 +684,15 @@ class PanelManager extends ChangeNotifier {
 /// window subtrees (rendered as sibling views by the framework's
 /// `WindowManager`, so they still inherit ancestors placed above `MaterialApp`).
 class PanelScope extends InheritedNotifier<PanelManager> {
-  const PanelScope({super.key, required PanelManager manager, required super.child})
-      : super(notifier: manager);
+  const PanelScope({
+    super.key,
+    required PanelManager manager,
+    required super.child,
+  }) : super(notifier: manager);
 
   static PanelManager of(BuildContext context) {
-    final PanelScope? scope = context.dependOnInheritedWidgetOfExactType<PanelScope>();
+    final PanelScope? scope =
+        context.dependOnInheritedWidgetOfExactType<PanelScope>();
     assert(scope != null, 'No PanelScope found in context');
     return scope!.notifier!;
   }
